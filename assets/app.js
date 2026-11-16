@@ -419,7 +419,6 @@
 
   function renderChat() {
     const body = $('#chatBody');
-    const nearBottom = body.scrollHeight - body.scrollTop - body.clientHeight < 80;
     body.innerHTML = '';
     if (!state.chat.length) {
       body.innerHTML = `<div class="chat-empty">
@@ -445,7 +444,7 @@
         </div>`;
       body.appendChild(div);
     });
-    if (nearBottom || true) body.scrollTop = body.scrollHeight;
+    body.scrollTop = body.scrollHeight;
   }
 
   function buildStickerTray() {
@@ -1067,21 +1066,23 @@
       $('#' + id).addEventListener('change', saveNames);
     });
     $('#pinToggle').addEventListener('change', () => {
-      state.settings.pinEnabled = $('#pinToggle').checked;
-      $('#pinSet').hidden = !state.settings.pinEnabled;
-      if (!state.settings.pinEnabled) {
-        state.settings.pinHash = '';
-        save();
-        toast('PIN 잠금을 껐어요');
-      } else {
+      const on = $('#pinToggle').checked;
+      $('#pinSet').hidden = !on;
+      if (on) {
         $('#pinInput').focus();
+        return;
       }
+      state.settings.pinEnabled = false;
+      state.settings.pinHash = '';
+      save();
+      toast('PIN 잠금을 껐어요');
     });
     $('#pinSave').addEventListener('click', async () => {
       const pin = ($('#pinInput').value || '').replace(/[^0-9]/g, '');
       if (pin.length !== 4) { toast('숫자 4자리를 입력해 주세요 🐢'); return; }
       state.settings.pinHash = await hashPin(pin);
       state.settings.pinEnabled = true;
+      $('#pinToggle').checked = true;
       save();
       $('#pinInput').value = '';
       toast('가족 PIN을 저장했어요 🔒');
