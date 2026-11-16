@@ -603,7 +603,7 @@
     $('#pinInput').value = '';
     $('#soundToggle').checked = !!state.settings.sound;
     $('#syncUrl').value = state.settings.syncUrl || '';
-    setSyncStatus(sync.ref ? '실시간 동기화 연결됨 🐱' : (state.settings.syncUrl ? '동기화 주소로 연결하는 중… (실패하면 가족 DB 규칙을 확인해 주세요)' : '로컬 저장만 사용 중'), sync.ref ? 'ok' : '');
+    setSyncStatus(state.settings.syncUrl ? '가족 동기화 주소: ' + state.settings.syncUrl : '로컬 저장만 사용 중', state.settings.syncUrl ? 'ok' : '');
     $('#settingsModal').hidden = false;
   }
 
@@ -703,11 +703,23 @@
         await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
         await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js');
       }
+      // 주소가 실제로 존재하는지 먼저 확인 (없으면 안내)
+      let reachable = true;
+      try {
+        const probe = await fetch(url.replace(/\/$/, '') + '/mongleFamily/main.json', { cache: 'no-store' });
+        if (probe.status === 404) {
+          reachable = false;
+          setSyncStatus('동기화 주소를 찾지 못했어요 — Firebase에서 Realtime Database를 먼저 만들어 주세요', 'err');
+        }
+      } catch (e) {
+        setSyncStatus('동기화 주소를 확인하지 못했어요 (인터넷 연결 확인)', 'err');
+      }
       if (!firebase.apps.length) firebase.initializeApp({ databaseURL: url });
       sync.ref = firebase.database().ref('mongleFamily/main');
       sync.ready = true;
       sync.ref.on('value', (snap) => {
         const remote = snap.val();
+        if (!reachable) return;
         if (!remote || !remote.updatedAt) { pushNow(); setSyncStatus('실시간 동기화 연결됨 🐱', 'ok'); return; }
         if ((remote.updatedAt || 0) > (state.updatedAt || 0) + 60) {
           try {
