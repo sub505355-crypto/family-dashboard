@@ -8,6 +8,7 @@
 <style>
   * { box-sizing: border-box; }
   body {
+  overflow-x: hidden;
     margin: 0; padding: 28px 20px 36px; min-height: 100vh;
     font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif; color: #5B4A3F;
     background:
@@ -19,7 +20,7 @@
   }
   h1 { font-family: 'Jua'; font-weight: 400; font-size: 26px; color: #C26087; margin: 0; text-align: center; }
   p.sub { margin: -8px 0 0; font-size: 13px; color: #94806F; text-align: center; }
-  .stage { display: flex; align-items: flex-end; gap: 34px; flex-wrap: wrap; justify-content: center; }
+  .stage { display: flex; align-items: flex-start; gap: 26px; flex-wrap: nowrap; justify-content: center; }
   .device { text-align: center; }
   .device .cap { font-family: 'Jua'; font-size: 15px; color: #8A6E5D; margin-bottom: 8px; }
   .frame {
@@ -32,13 +33,13 @@
     content: ""; position: absolute; left: 50%; top: 6px; transform: translateX(-50%);
     width: 54px; height: 6px; border-radius: 99px; background: #E9DCD0;
   }
-  .phone .screen { width: 390px; height: 770px; }
+  .phone .screen { width: 390px; height: 468px; }
   .tablet .screen { width: 820px; height: 1090px; }
   .screen { border: 0; border-radius: 28px; background: #FFF8EE; display: block; }
-  .phone .frame { transform: scale(.80); transform-origin: top left; }
+  .phone .frame { transform: none; }
   .tablet .frame { transform: scale(.56); transform-origin: top left; }
-  .phone .fit { width: 346px; height: 652px; overflow: hidden; }
-  .tablet .fit { width: 488px; height: 638px; overflow: hidden; }
+  .phone .fit { width: auto; height: auto; overflow: visible; }
+  .tablet .fit { width: 490px; height: 640px; overflow: hidden; }
   .note { font-size: 11.5px; color: #A0887A; margin-top: 8px; }
   a { color: #E2708E; }
 </style>
