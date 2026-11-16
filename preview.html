@@ -32,13 +32,12 @@
     content: ""; position: absolute; left: 50%; top: 6px; transform: translateX(-50%);
     width: 54px; height: 6px; border-radius: 99px; background: #E9DCD0;
   }
-  .phone .screen { width: 390px; height: 760px; }
-  .tablet .screen { width: 820px; height: 1080px; }
+  .phone .screen { width: 390px; height: 770px; }
+  .tablet .screen { width: 820px; height: 1090px; }
   .screen { border: 0; border-radius: 28px; background: #FFF8EE; display: block; }
-  .phone .fit { width: 344px; height: 640px; overflow: hidden; }
-  .phone .frame { transform: scale(.80); transform-origin: top left; }
-  .tablet .fit { width: 484px; height: 630px; overflow: hidden; }
-  .tablet .frame { transform: scale(.56); transform-origin: top left; }
+  .phone .fit, .tablet .fit { width: auto; height: auto; overflow: visible; }
+  .phone .screen { zoom: .82; }
+  .tablet .screen { zoom: .58; }
   .note { font-size: 11.5px; color: #A0887A; margin-top: 8px; }
   a { color: #E2708E; }
 </style>
