@@ -64,5 +64,20 @@
       <div class="note">두 칸 카드 배치 · 타이머와 채팅이 넓게</div>
     </div>
   </div>
+
+  <style>
+    body.only-phone .tablet, body.only-tablet .phone, body.only-phone p.sub, body.only-tablet p.sub { display: none; }
+    body.only-phone, body.only-tablet { padding: 18px 14px; }
+    body.only-phone h1, body.only-tablet h1 { font-size: 20px; }
+    body.only-phone .phone .screen { height: 470px; }
+    body.only-tablet .tablet .screen { height: 560px; }
+    body.only-phone .stage, body.only-tablet .stage { gap: 0; }
+  </style>
+  <script>
+    (function () {
+      var only = new URLSearchParams(location.search).get('only');
+      if (only === 'phone' || only === 'tablet') document.body.classList.add('only-' + only);
+    })();
+  </script>
 </body>
 </html>
