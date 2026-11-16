@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF3E4">
+<title>몽글 가족 대시보드 🐱🐢</title>
+<meta name="description" content="공부 용돈 적립, 가족 랜덤 미션, 도장판, 가족 채팅, 공부 타이머까지 한 화면에 담은 우리 가족 대시보드">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ───────── 캐릭터 SVG ───────── -->
+<svg class="sprite" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shellGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D6F3E1"/><stop offset="1" stop-color="#AEE2C4"/>
+    </linearGradient>
+    <linearGradient id="catGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF8EE"/><stop offset="1" stop-color="#FFE9D2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 고양이 -->
+  <symbol id="ch-cat" viewBox="0 0 128 128">
+    <ellipse cx="64" cy="113" rx="36" ry="7" fill="#E7CDBB" opacity=".45"/>
+    <path d="M30 52C20 26 36 15 49 35Z" fill="url(#catGrad)" stroke="#E2B094" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M98 52C108 26 92 15 79 35Z" fill="url(#catGrad)" stroke="#E2B094" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M35 45C30 30 39 24 46 36Z" fill="#FFC2D2"/>
+    <path d="M93 45C98 30 89 24 82 36Z" fill="#FFC2D2"/>
+    <ellipse cx="64" cy="70" rx="42" ry="37" fill="url(#catGrad)" stroke="#E2B094" stroke-width="3.5"/>
+    <ellipse cx="49" cy="66" rx="5" ry="6.5" fill="#5C463A"/>
+    <ellipse cx="79" cy="66" rx="5" ry="6.5" fill="#5C463A"/>
+    <circle cx="50.8" cy="63.4" r="1.9" fill="#fff"/>
+    <circle cx="80.8" cy="63.4" r="1.9" fill="#fff"/>
+    <ellipse cx="39" cy="80" rx="8" ry="5" fill="#FFB3C6" opacity=".85"/>
+    <ellipse cx="89" cy="80" rx="8" ry="5" fill="#FFB3C6" opacity=".85"/>
+    <path d="M60 76h8l-4 4.2z" fill="#F292A8"/>
+    <path d="M64 80.5v3.2M64 83.7c-1.8 2.6-5.2 2.4-6.2 0M64 83.7c1.8 2.6 5.2 2.4 6.2 0" fill="none" stroke="#B8896F" stroke-width="2" stroke-linecap="round"/>
+    <path d="M24 70h-8M25 78h-8M104 70h8M103 78h8" stroke="#DCB49A" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+    <ellipse cx="50" cy="100" rx="10.5" ry="7.5" fill="#FFF6EC" stroke="#E2B094" stroke-width="3"/>
+    <ellipse cx="78" cy="100" rx="10.5" ry="7.5" fill="#FFF6EC" stroke="#E2B094" stroke-width="3"/>
+  </symbol>
+
+  <!-- 거북이 -->
+  <symbol id="ch-turtle" viewBox="0 0 128 128">
+    <ellipse cx="64" cy="113" rx="36" ry="7" fill="#CFC6B6" opacity=".4"/>
+    <ellipse cx="30" cy="98" rx="12" ry="8" fill="#DCF4E7" stroke="#8CCFAA" stroke-width="3"/>
+    <ellipse cx="98" cy="98" rx="12" ry="8" fill="#DCF4E7" stroke="#8CCFAA" stroke-width="3"/>
+    <ellipse cx="64" cy="78" rx="47" ry="34" fill="url(#shellGrad)" stroke="#77C398" stroke-width="3.5"/>
+    <path d="M45 63c8-7 30-7 38 0" fill="none" stroke="#8FD2AD" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="64" cy="70" r="6.5" fill="#9FDCB8"/>
+    <circle cx="46" cy="82" r="5" fill="#9FDCB8"/>
+    <circle cx="82" cy="82" r="5" fill="#9FDCB8"/>
+    <circle cx="38" cy="70" r="4" fill="#9FDCB8"/>
+    <circle cx="90" cy="70" r="4" fill="#9FDCB8"/>
+    <ellipse cx="64" cy="40" rx="27" ry="23" fill="#DCF4E7" stroke="#8CCFAA" stroke-width="3.5"/>
+    <ellipse cx="54" cy="38" rx="4.6" ry="5.6" fill="#4E6558"/>
+    <ellipse cx="74" cy="38" rx="4.6" ry="5.6" fill="#4E6558"/>
+    <circle cx="55.6" cy="35.6" r="1.7" fill="#fff"/>
+    <circle cx="75.6" cy="35.6" r="1.7" fill="#fff"/>
+    <ellipse cx="44" cy="47" rx="6.5" ry="4" fill="#FFB9C9" opacity=".8"/>
+    <ellipse cx="84" cy="47" rx="6.5" ry="4" fill="#FFB9C9" opacity=".8"/>
+    <path d="M58 48c2 2.6 10 2.6 12 0" fill="none" stroke="#5F9E80" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 도장 : 고양이 -->
+  <symbol id="stamp-cat" viewBox="0 0 64 64">
+    <path d="M11 27 13 11 24 19Z" fill="currentColor"/>
+    <path d="M53 27 51 11 40 19Z" fill="currentColor"/>
+    <ellipse cx="32" cy="35" rx="21" ry="18.5" fill="currentColor"/>
+    <ellipse cx="25" cy="33" rx="2.6" ry="3.4" fill="#fff"/>
+    <ellipse cx="39" cy="33" rx="2.6" ry="3.4" fill="#fff"/>
+    <path d="M32 38.5v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+    <path d="M28.5 43c2 1.8 5 1.8 7 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M9 36h-5M10 41h-5M55 36h5M54 41h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 도장 : 거북이 -->
+  <symbol id="stamp-turtle" viewBox="0 0 64 64">
+    <ellipse cx="32" cy="43" rx="23" ry="15" fill="currentColor"/>
+    <circle cx="32" cy="20" r="11.5" fill="currentColor"/>
+    <ellipse cx="28" cy="19" rx="2.3" ry="3" fill="#fff"/>
+    <ellipse cx="36" cy="19" rx="2.3" ry="3" fill="#fff"/>
+    <path d="M28.5 24.5c2.4 1.6 4.6 1.6 7 0" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M20 43h24M32 34v18" stroke="#fff" stroke-width="2" opacity=".75"/>
+    <ellipse cx="6" cy="47" rx="4" ry="3" fill="currentColor"/>
+    <ellipse cx="58" cy="47" rx="4" ry="3" fill="currentColor"/>
+  </symbol>
+
+  <!-- 파츠(참) -->
+  <symbol id="part-star" viewBox="0 0 32 32"><path d="M16 3l3.6 8.2 8.9.8-6.7 5.9 2 8.7L16 22.2 8.2 26.6l2-8.7L3.5 12l8.9-.8z" fill="currentColor"/></symbol>
+  <symbol id="part-heart" viewBox="0 0 32 32"><path d="M16 27S4.5 19.6 4.5 12.3C4.5 8.4 7.4 5.5 11 5.5c3 0 4.4 2.1 5 3.2.6-1.1 2-3.2 5-3.2 3.6 0 6.5 2.9 6.5 6.8C27.5 19.6 16 27 16 27z" fill="currentColor"/></symbol>
+  <symbol id="part-cherry" viewBox="0 0 32 32"><path d="M16 4c-3 5-5 9-9 11" stroke="#7CC79E" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="10" cy="22" r="6" fill="currentColor"/><circle cx="23" cy="20" r="5" fill="currentColor"/></symbol>
+  <symbol id="part-flower" viewBox="0 0 32 32"><g fill="currentColor"><circle cx="16" cy="8" r="5"/><circle cx="24" cy="14" r="5"/><circle cx="21" cy="23" r="5"/><circle cx="11" cy="23" r="5"/><circle cx="8" cy="14" r="5"/></g><circle cx="16" cy="16" r="3.4" fill="#FFF6D8"/></symbol>
+  <symbol id="coin" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#FFD971" stroke="#E9B23F" stroke-width="3"/><circle cx="20" cy="20" r="12" fill="none" stroke="#F5C95F" stroke-width="2"/><path d="M20 12v16M15 16h10M15 24h10" stroke="#E0A63A" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<!-- ───────── PIN 잠금 ───────── -->
+<div class="lock" id="lockScreen" hidden>
+  <div class="lock-inner">
+    <svg class="lock-cat" aria-hidden="true"><use href="#ch-cat"/></svg>
+    <h2>우리 가족만 들어와요 🐾</h2>
+    <p class="lock-sub">가족 PIN 4자리를 눌러주세요</p>
+    <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+    <div class="keypad" id="keypad"></div>
+    <p class="lock-msg" id="lockMsg"></p>
+  </div>
+</div>
+
+<!-- ───────── 앱 ───────── -->
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-cat" aria-hidden="true"><use href="#ch-cat"/></svg>
+      <span class="brand-text">몽글 가족</span>
+      <svg class="brand-turtle" aria-hidden="true"><use href="#ch-turtle"/></svg>
+    </div>
+    <div class="topbar-right">
+      <div class="family-stack" id="familyStack"></div>
+      <button class="round-icon" id="lockBtn" title="화면 잠그기" aria-label="화면 잠그기">🔒</button>
+      <button class="round-icon" id="settingsBtn" title="설정" aria-label="설정">⚙️</button>
+    </div>
+  </header>
+
+  <nav class="chips" id="chips" aria-label="메뉴">
+    <a class="chip" href="#money">🪙 용돈</a>
+    <a class="chip" href="#todos">🖐️ 할 일</a>
+    <a class="chip" href="#mission">🎲 미션</a>
+    <a class="chip" href="#stamp">🐾 도장판</a>
+    <a class="chip" href="#chat">💬 채팅</a>
+    <a class="chip" href="#timer">⏰ 타이머</a>
+  </nav>
+
+  <main>
+    <!-- 히어로 -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="hero-date" id="heroDate"></p>
+        <h1 id="heroTitle"><span id="heroKidName">현</span>, 오늘도 몽글몽글 🐱🐢</h1>
+        <p class="hero-sub" id="heroSub">공부도 미션도 하나씩 차곡차곡!</p>
+      </div>
+      <div class="hero-char">
+        <svg class="hero-turtle" aria-hidden="true"><use href="#ch-turtle"/></svg>
+        <svg class="hero-cat" aria-hidden="true"><use href="#ch-cat"/></svg>
+        <span class="spark s1">✦</span><span class="spark s2">✦</span><span class="spark s3">✧</span>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-label">오늘 번 용돈</span>
+          <strong class="stat-val" id="statToday">0원</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">할 일</span>
+          <strong class="stat-val" id="statTodo">0 / 0</strong>
+        </div>
+        <div class="stat">
+          <span class="stat-label">도장</span>
+          <strong class="stat-val" id="statStamp">0개</strong>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- 1. 용돈 적립 -->
+      <section class="card" id="money">
+        <div class="card-head">
+          <h2>🪙 공부 용돈 적립 <span class="muted" id="moneyKidName">현</span></h2>
+          <button class="mini-btn" id="spendBtn">용돈 쓰기</button>
+        </div>
+        <div class="wallet">
+          <span class="wallet-label"><span id="walletKidName">현</span> 용돈 통장 잔액</span>
+          <strong class="wallet-amount" id="balanceText">0원</strong>
+          <span class="wallet-sub" id="walletSub">오늘 +0원</span>
+        </div>
+        <p class="hint">공부를 끝내고 버튼을 누르면 동전이 팡팡! 🪙</p>
+        <div class="earn-list" id="earnList"></div>
+        <button class="dashed-btn" id="addItemBtn">+ 공부 항목 추가</button>
+        <h3 class="mini-title">최근 내역 <span class="muted">(금액은 ✎ 로 수정)</span></h3>
+        <ul class="history" id="historyList"></ul>
+      </section>
+
+      <!-- 3. 할 일 -->
+      <section class="card" id="todos">
+        <div class="card-head">
+          <h2>🖐️ <span id="todoKidName">현</span>의 오늘의 할 일</h2>
+          <span class="pill" id="todoPill">0 / 0</span>
+        </div>
+        <div class="progress"><span id="todoBar"></span></div>
+        <ul class="todo-list" id="todoList"></ul>
+        <form class="add-row" id="todoForm">
+          <input id="todoInput" type="text" maxlength="40" placeholder="할 일 추가 (예: 받아쓰기 1장)" autocomplete="off">
+          <button class="primary" type="submit">추가</button>
+        </form>
+        <p class="hint center">모두 체크하면 하이파이브가 터져요! 🖐️✨</p>
+      </section>
+
+      <!-- 2. 랜덤 미션 -->
+      <section class="card" id="mission">
+        <div class="card-head">
+          <h2>🎲 오늘의 가족 미션</h2>
+          <span class="pill soft" id="missionPill">대기</span>
+        </div>
+        <div class="mission-box" id="missionBox">
+          <svg class="mission-char" aria-hidden="true"><use href="#ch-turtle"/></svg>
+          <p class="mission-text" id="missionText">뽑기 버튼을 눌러 오늘의 미션을 골라봐요!</p>
+          <div class="mission-actions">
+            <button class="primary" id="drawBtn">오늘 미션 뽑기</button>
+            <button class="soft" id="doneMissionBtn" hidden>미션 완료!</button>
+          </div>
+        </div>
+        <form class="add-row" id="missionForm">
+          <input id="missionInput" type="text" maxlength="40" placeholder="우리 가족만의 미션 추가" autocomplete="off">
+          <button class="primary" type="submit">추가</button>
+        </form>
+        <details class="pool">
+          <summary>미션 목록 <span id="poolCount"></span></summary>
+          <ul id="missionPool"></ul>
+        </details>
+      </section>
+
+      <!-- 4. 도장판 -->
+      <section class="card" id="stamp">
+        <div class="card-head">
+          <h2>🐾 <span id="stampKidName">현</span>의 미션 도장판</h2>
+          <span class="pill" id="stampPill">0개</span>
+        </div>
+        <p class="hint">미션을 완료하면 고양이·거북이 도장이 <b>쾅!</b></p>
+        <div class="stamp-board" id="stampBoard"></div>
+        <p class="stamp-note" id="stampNote">한 칸씩 채워보자!</p>
+      </section>
+
+      <!-- 5. 채팅 -->
+      <section class="card wide" id="chat">
+        <div class="card-head chat-head">
+          <h2>💬 가족 채팅방</h2>
+          <div class="who-switch" id="whoSwitch"></div>
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="sticker-tray" id="stickerTray" hidden></div>
+        <form class="chat-input" id="chatForm">
+          <button class="round-icon tray-toggle" type="button" id="stickerBtn" aria-label="스티커 열기">😺</button>
+          <input id="chatInput" type="text" maxlength="200" placeholder="메시지를 남겨보세요" autocomplete="off">
+          <button class="primary send" type="submit">보내기</button>
+        </form>
+        <p class="hint tiny" id="chatHint">이 기기에 저장돼요. 설정에서 실시간 동기화를 연결하면 가족과 함께 볼 수 있어요.</p>
+      </section>
+
+      <!-- 6. 타이머 -->
+      <section class="card wide" id="timer">
+        <div class="card-head">
+          <h2>⏰ 공부 타이머 &amp; 태블릿 알람</h2>
+        </div>
+        <div class="timer-grid">
+          <div class="timer-left">
+            <div class="timer-ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+                <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="52"></circle>
+              </svg>
+              <div class="timer-center">
+                <span class="timer-time" id="timerTime">10:00</span>
+                <span class="timer-state" id="timerState">준비</span>
+              </div>
+            </div>
+            <div class="dur-row" id="durRow">
+              <button class="dur" data-min="10">10분</button>
+              <button class="dur is-on" data-min="20">20분</button>
+              <button class="dur" data-min="30">30분</button>
+              <button class="dur" data-min="custom">직접</button>
+            </div>
+            <div class="dur-custom" id="durCustom" hidden>
+              <input id="customMin" type="number" min="1" max="180" inputmode="numeric" placeholder="분">
+              <button class="soft" id="customApply">적용</button>
+            </div>
+            <div class="timer-btns">
+              <button class="primary" id="timerStart">시작</button>
+              <button class="soft" id="timerReset">초기화</button>
+            </div>
+          </div>
+          <div class="timer-right">
+            <h3 class="mini-title">🌙 태블릿 끄기 알람</h3>
+            <div class="alarm-row">
+              <input type="time" id="alarmTime" value="20:30" aria-label="알람 시각">
+              <label class="switch">
+                <input type="checkbox" id="alarmOn">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <p class="hint" id="alarmHint">알람을 켜두면 그 시각에 화면 가득 종료 안내가 떠요.</p>
+            <button class="soft wide-btn" id="alarmTest">🔔 소리 미리 듣기</button>
+            <div class="timer-tip">
+              <svg class="tip-turtle" aria-hidden="true"><use href="#ch-turtle"/></svg>
+              <p>공부 끝나면 거북이처럼 <b>느긋하게 쉬어가요</b> 🐢</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <svg class="foot-cat" aria-hidden="true"><use href="#ch-cat"/></svg>
+      <p>우리 가족의 하루를 몽글몽글 모으는 중 🐱🐢</p>
+    </footer>
+  </main>
+</div>
+
+<!-- ───────── 하이파이브 ───────── -->
+<div class="overlay celebrate" id="highFive" hidden>
+  <div class="confetti" id="confetti"></div>
+  <div class="hf-inner">
+    <div class="hf-chars">
+      <svg class="hf-cat" aria-hidden="true"><use href="#ch-cat"/></svg>
+      <span class="hf-hand">🖐️</span>
+      <svg class="hf-turtle" aria-hidden="true"><use href="#ch-turtle"/></svg>
+    </div>
+    <h2>하이파이브! ✨</h2>
+    <p>오늘 할 일을 <b>모두</b> 끝냈어요.<br>정말 멋져요, 최고! 🐱🐢</p>
+    <button class="primary big" id="hfClose">짝! 하고 닫기</button>
+  </div>
+</div>
+
+<!-- ───────── 타이머/알람 종료 ───────── -->
+<div class="overlay rest" id="restModal" hidden>
+  <div class="rest-inner">
+    <svg class="rest-char" aria-hidden="true"><use href="#ch-turtle"/></svg>
+    <p class="rest-kicker" id="restKicker">타이머 종료</p>
+    <h2 id="restTitle">공부 끝! 🐢</h2>
+    <p id="restMsg">눈을 한 번 감고, 물 한 잔 마셔요 💧</p>
+    <button class="primary big" id="restClose">확인했어요</button>
+  </div>
+</div>
+
+<!-- ───────── 설정 ───────── -->
+<div class="overlay sheet-wrap" id="settingsModal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="설정">
+    <div class="sheet-head">
+      <h2>⚙️ 설정</h2>
+      <button class="round-icon" id="settingsClose" aria-label="닫기">✕</button>
+    </div>
+    <div class="sheet-body">
+      <h3 class="mini-title">가족 이름</h3>
+      <div class="name-grid">
+        <label>엄마 <input type="text" id="nameMom" maxlength="8"></label>
+        <label>아빠 <input type="text" id="nameDad" maxlength="8"></label>
+        <label>아이 <input type="text" id="nameKid" maxlength="8"></label>
+      </div>
+
+      <h3 class="mini-title">가족 PIN 잠금</h3>
+      <label class="row-toggle">
+        <span>PIN 잠금 사용</span>
+        <span class="switch"><input type="checkbox" id="pinToggle"><span class="slider"></span></span>
+      </label>
+      <div class="pin-set" id="pinSet" hidden>
+        <input type="tel" id="pinInput" inputmode="numeric" maxlength="4" placeholder="숫자 4자리">
+        <button class="soft" id="pinSave">저장</button>
+      </div>
+      <p class="hint tiny">링크를 아는 사람이 아무나 들어오지 못하게 막는 간단한 잠금이에요. (PIN을 잊으면 브라우저 저장 데이터를 지워야 해요)</p>
+
+      <h3 class="mini-title">효과음</h3>
+      <label class="row-toggle">
+        <span>동전·도장·알람 소리</span>
+        <span class="switch"><input type="checkbox" id="soundToggle"><span class="slider"></span></span>
+      </label>
+
+      <h3 class="mini-title">가족 실시간 동기화 (선택)</h3>
+      <p class="hint tiny">비워두면 이 기기(브라우저)에만 저장돼요. Firebase Realtime Database 주소를 넣으면 엄마 폰과 아이 태블릿이 같은 내용을 함께 봐요.</p>
+      <div class="sync-row">
+        <input type="url" id="syncUrl" placeholder="https://내프로젝트-default-rtdb.firebaseio.com">
+        <button class="soft" id="syncSave">연결</button>
+      </div>
+      <p class="hint tiny" id="syncStatus">로컬 저장만 사용 중</p>
+
+      <h3 class="mini-title">데이터</h3>
+      <div class="data-row">
+        <button class="soft" id="exportBtn">백업 내보내기</button>
+        <button class="soft danger" id="resetBtn">전체 초기화</button>
+      </div>
+      <p class="hint tiny">몽글 가족 대시보드 · 만든 날 2026.11</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="assets/app.js"></script>
+</body>
+</html>
