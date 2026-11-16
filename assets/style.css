@@ -1,5 +1,6 @@
 /* ===== 몽글 가족 대시보드 ===== */
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 :root {
   --cream: #FFF8EE;
@@ -138,15 +139,15 @@ h1, h2, h3 { font-family: var(--font-title); font-weight: 400; margin: 0; letter
 .hero h1 { font-size: 23px; color: #C26087; line-height: 1.25; word-break: keep-all; }
 .hero-sub { margin: 6px 0 0; font-size: 13.5px; color: #8C7466; }
 .hero-char {
-  position: absolute; right: 0; top: 2px; width: 116px; height: 108px; z-index: 1;
+  position: absolute; right: 2px; top: 2px; width: 120px; height: 98px; z-index: 1;
 }
 .hero-cat {
-  position: absolute; right: 34px; bottom: 0; width: 76px; height: 76px;
+  position: absolute; right: 36px; bottom: 0; width: 74px; height: 74px;
   animation: bob 3.4s ease-in-out infinite;
   transform-origin: 50% 90%;
 }
 .hero-turtle {
-  position: absolute; right: 0; bottom: -2px; width: 64px; height: 64px;
+  position: absolute; right: 0; bottom: -2px; width: 60px; height: 60px;
   animation: bob 3.4s ease-in-out .6s infinite;
 }
 .spark { position: absolute; color: #FFC46B; font-size: 15px; animation: twinkle 2.6s ease-in-out infinite; }
@@ -154,7 +155,7 @@ h1, h2, h3 { font-family: var(--font-title); font-weight: 400; margin: 0; letter
 .spark.s2 { top: 52px; right: 10px; color: #FF98B4; animation-delay: .7s; }
 .spark.s3 { top: 20px; right: 62px; color: #9BD8B6; animation-delay: 1.3s; }
 
-.hero-stats { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.hero-stats { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
 .stat {
   background: rgba(255,255,255,.78); border-radius: var(--r-sm);
   padding: 8px 10px; border: 2px solid rgba(255,255,255,.9);
@@ -225,23 +226,23 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
 .wallet-amount.pulse { animation: pulsePop .5s ease; }
 .wallet-sub { font-size: 12px; color: #B2925C; }
 
-.earn-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 9px; margin: 10px 0; }
+.earn-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 9px; margin: 10px 0; }
 .earn-card {
   position: relative; display: flex; align-items: stretch; gap: 4px;
   background: #FFF3F7; border: 2px solid #FFE2EB; border-radius: 18px;
   padding: 4px 4px 4px 2px; overflow: hidden;
 }
 .earn-main {
-  flex: 1; text-align: left; padding: 9px 8px 9px 11px; border-radius: 14px;
-  display: flex; flex-direction: column; gap: 3px; min-width: 0;
+  flex: 1; text-align: left; padding: 9px 2px 9px 11px; border-radius: 14px;
+  display: flex; flex-direction: column; gap: 3px; min-width: 0; overflow: hidden;
   transition: transform .12s ease, background .15s ease;
 }
 .earn-main:active { transform: scale(.97); background: #FFE9F1; }
 .earn-name { font-size: 13.5px; color: #7A5B4B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.earn-amt { font-family: var(--font-title); font-size: 15px; color: #E2708E; }
+.earn-amt { font-family: var(--font-title); font-size: 14.5px; color: #E2708E; white-space: nowrap; }
 .amt-edit {
-  width: 30px; border-radius: 12px; color: #C89AAC; font-size: 13px;
-  background: #fff; border: 1.5px solid #FFE2EB;
+  width: 28px; flex: 0 0 28px; margin: 2px 2px 2px 0; border-radius: 11px;
+  color: #C89AAC; font-size: 12px; background: #fff; border: 1.5px solid #FFE2EB;
 }
 .earn-edit { display: flex; flex-direction: column; gap: 6px; padding: 8px; }
 .earn-edit input { width: 100%; border: 2px solid var(--line); border-radius: 10px; padding: 6px 8px; font-size: 13px; background: #fff; }
@@ -635,9 +636,9 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
   .brand-turtle { width: 40px; height: 40px; }
   .hero { padding: 28px 26px 22px; }
   .hero-text { max-width: 60%; padding-right: 0; }
-  .hero-char { width: 210px; height: 168px; right: 14px; }
-  .hero-cat { width: 126px; height: 126px; right: 64px; }
-  .hero-turtle { width: 106px; height: 106px; }
+  .hero-char { width: 196px; height: 128px; right: 20px; top: 10px; }
+  .hero-cat { width: 100px; height: 100px; right: 62px; }
+  .hero-turtle { width: 84px; height: 84px; }
   .hero h1 { font-size: 31px; }
   .stat-val { font-size: 18px; }
   .grid { grid-template-columns: 1fr 1fr; gap: 18px; }
@@ -652,9 +653,9 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
 
 @media (min-width: 1024px) {
   .hero h1 { font-size: 34px; }
-  .hero-char { width: 250px; height: 190px; }
-  .hero-cat { width: 144px; height: 144px; right: 80px; }
-  .hero-turtle { width: 120px; height: 120px; }
+  .hero-char { width: 236px; height: 146px; }
+  .hero-cat { width: 112px; height: 112px; right: 80px; }
+  .hero-turtle { width: 94px; height: 94px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

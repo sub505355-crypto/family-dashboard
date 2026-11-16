@@ -132,7 +132,7 @@
 
   function renderFamily() {
     const kidName = (state.members.kid && state.members.kid.name) || '현';
-    ['#walletKidName', '#todoKidName', '#moneyKidName', '#stampKidName', '#heroKidName'].forEach((sel) => {
+    ['#walletKidName', '#todoKidName', '#stampKidName', '#heroKidName'].forEach((sel) => {
       const el = $(sel);
       if (el) el.textContent = kidName;
     });
