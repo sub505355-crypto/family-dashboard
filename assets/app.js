@@ -14,10 +14,13 @@
   const timeText = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
   const MEMBERS = {
-    mom: { emoji: '🐱', cls: 'mom' },
-    dad: { emoji: '🐢', cls: 'dad' },
-    kid: { emoji: '🐰', cls: 'kid' }
+    mom: { av: 'av-mom', cls: 'mom' },
+    dad: { av: 'av-dad', cls: 'dad' },
+    kid: { av: 'av-kid', cls: 'kid' }
   };
+  const avHTML = (k, cls = 'av') => `<svg class="${cls}" aria-hidden="true"><use href="#${MEMBERS[k].av}"></use></svg>`;
+
+  const DEFAULT_SYNC_URL = 'https://inbongppu-default-rtdb.asia-southeast1.firebasedatabase.app';
 
   const STICKERS = ['🐱', '🐢', '😻', '🥰', '💗', '⭐', '🍒', '🌈', '🎉', '👏', '🍰', '🐣'];
   const PRAISE = ['최고야!', '사랑해', '고마워', '힘내!'];
@@ -45,7 +48,7 @@
       chat: [],
       moments: { mom: { text: '', at: 0 }, dad: { text: '', at: 0 }, kid: { text: '', at: 0 } },
       me: 'mom',
-      settings: { pinEnabled: false, pinHash: '', sound: true, syncUrl: '' },
+      settings: { pinEnabled: false, pinHash: '', sound: true, syncUrl: DEFAULT_SYNC_URL, syncOn: true },
       alarm: { time: '20:30', on: false },
       timer: { minutes: 20 }
     };
@@ -118,7 +121,7 @@
     });
     const stack = $('#familyStack');
     stack.innerHTML = ['mom', 'dad', 'kid'].map((k) =>
-      `<span class="face ${MEMBERS[k].cls}" title="${esc(state.members[k].name)}">${MEMBERS[k].emoji}</span>`
+      `<span class="face ${MEMBERS[k].cls}" title="${esc(state.members[k].name)}">${avHTML(k, 'av')}</span>`
     ).join('');
   }
 
@@ -276,7 +279,7 @@
     const box = $('#whoSwitch');
     box.innerHTML = ['mom', 'dad', 'kid'].map((k) =>
       `<button class="who-btn ${state.me === k ? 'on' : ''}" data-me="${k}">
-        <span class="w-emoji">${MEMBERS[k].emoji}</span> ${esc(state.members[k].name)}
+        ${avHTML(k, 'av')} ${esc(state.members[k].name)}
       </button>`
     ).join('');
   }
@@ -300,12 +303,13 @@
       const isSticker = m.kind === 'sticker';
       const isPraise = m.kind === 'praise';
       div.innerHTML = `
-        <span class="avatar">${MEMBERS[who].emoji}</span>
+        <span class="avatar">${avHTML(who, 'av')}</span>
         <div class="bubble-wrap">
           ${mine ? '' : `<span class="bubble-name">${esc(name)}</span>`}
           <div class="bubble ${isSticker ? 'sticker' : ''} ${isPraise ? 'praise' : ''}">${esc(m.text)}</div>
           <span class="bubble-time">${timeText(m.at)}</span>
-        </div>`;
+        </div>
+        <button class="msg-del" data-del-msg="${m.id}" aria-label="메시지 삭제">✕</button>`;
       body.appendChild(div);
     });
     body.scrollTop = body.scrollHeight;
@@ -652,9 +656,39 @@
     return merged;
   }
 
-  async function connectSync() {
-    const url = ($('#syncUrl').value || '').trim();
+  function hasLocalContent() {
+    return !!((state.history && state.history.length) ||
+      (state.chat && state.chat.length) ||
+      ['mom', 'dad', 'kid'].some((k) => state.moments && state.moments[k] && state.moments[k].text) ||
+      (state.todos && state.todos.some((t) => t.done)));
+  }
+
+  // 새 기기에서 기본값이 가족 데이터를 덮어쓰지 않도록, 먼저 Firebase에서 기존 데이터를 확인한다.
+  async function primeFromRemote() {
+    const url = (state.settings.syncUrl || '').trim();
+    if (!url) return;
+    try {
+      const res = await fetch(url.replace(/\/$/, '') + '/mongleFamily/main.json', { cache: 'no-store' });
+      if (!res.ok) return;
+      const remote = await res.json();
+      if (!remote || !remote.updatedAt) return;
+      const remoteWins = !hasLocalContent() || (remote.updatedAt || 0) > (state.updatedAt || 0) + 60;
+      if (!remoteWins) return;
+      sync.applying = true;
+      state = normalize(mergeRemote(remote));
+      persist(false);
+      renderAll();
+      sync.applying = false;
+      setSyncStatus('가족 데이터를 불러왔어요 🐱', 'ok');
+    } catch (e) {
+      /* 오프라인이거나 규칙이 막혀 있으면 로컬로 계속 동작 */
+    }
+  }
+
+  async function connectSync(urlOverride) {
+    const url = (urlOverride != null ? urlOverride : ($('#syncUrl').value || '')).trim();
     state.settings.syncUrl = url;
+    state.settings.syncOn = !!url;
     save();
     if (sync.ref) { try { sync.ref.off(); } catch (e) {} sync.ref = null; }
     if (!url) { setSyncStatus('로컬 저장만 사용 중', ''); toast('동기화를 끄고 이 기기에만 저장해요 🐢'); return; }
@@ -932,6 +966,25 @@
       const p = e.target.closest('[data-praise]');
       if (p) { sendChat(p.dataset.praise, 'praise'); }
     });
+    $('#chatBody').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-del-msg]');
+      if (!b) return;
+      const id = b.dataset.delMsg;
+      state.chat = state.chat.filter((m) => m.id !== id);
+      save();
+      renderChat();
+      playNotes([420], 'sine', 0.08);
+      toast('메시지를 지웠어요 🐱');
+    });
+    $('#clearChat').addEventListener('click', () => {
+      if (!state.chat.length) { toast('지울 대화가 없어요 🐢'); return; }
+      if (!confirm('가족 채팅 내역을 모두 지울까요? (되돌릴 수 없어요)')) return;
+      state.chat = [];
+      save();
+      renderChat();
+      playNotes([520, 400], 'sine', 0.1);
+      toast('채팅방을 비웠어요 🐢');
+    });
     $('#chatForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const input = $('#chatInput');
@@ -1107,7 +1160,7 @@
     if (state.settings.syncUrl) {
       $('#syncUrl').value = state.settings.syncUrl;
       setSyncStatus('동기화 다시 연결하는 중…');
-      connectSync();
+      primeFromRemote().then(() => connectSync(state.settings.syncUrl));
     }
   }
 
