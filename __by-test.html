@@ -3,27 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<title>입력자 표시 확인용 임시 페이지</title>
+<title>검증 후 정리</title>
 </head>
 <body>
 <script>
-/* 임시 검증 페이지: 이 기기 저장소에만 시험용 내역(by 있음/없음 섞음)을 심고 대시보드를 연다.
-   동기화 주소를 비워 실제 가족 Firebase에는 아무것도 쓰지 않는다. 검증 후 삭제한다. */
+/* 임시 정리 페이지: 검증용으로 심은 이 기기 저장값만 지우고 대시보드를 연다(실제 Firebase에는 쓰지 않음). 사용 후 삭제한다. */
 (function () {
   try {
-    var KEY = 'mongle-family-v1';
-    var now = Date.now();
-    var history = [
-      { id: 't1', type: 'earn', name: '받아쓰기 1장', amount: 100, at: now - 300000, by: 'mom' },
-      { id: 't2', type: 'earn', name: '수학 문제집', amount: 200, at: now - 3600000, by: 'dad' },
-      { id: 't3', type: 'spend', name: '문구점', amount: 500, at: now - 7200000, by: 'kid' },
-      { id: 't4', type: 'earn', name: '책 읽기 (예전 기록)', amount: 100, at: now - 86400000 }
-    ];
-    localStorage.setItem(KEY, JSON.stringify({
-      v: 1, updatedAt: now, history: history, me: 'dad',
-      settings: { syncUrl: '', syncOn: false }
-    }));
-    localStorage.setItem(KEY + '-seen-v1', JSON.stringify({ ids: history.map(function (h) { return 'h:' + h.id; }) }));
+    ['mongle-family-v1', 'mongle-family-v1-seen-v1',
+     'junyun-family-v1', 'junyun-family-v1-seen-v1'].forEach(function (k) {
+      localStorage.removeItem(k);
+    });
   } catch (e) {}
   location.replace('./index.html');
 })();
