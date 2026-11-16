@@ -649,7 +649,11 @@
     const merged = Object.assign({}, state, remote);
     merged.history = unionById(state.history, remote.history).sort((x, y) => y.at - x.at).slice(0, 80);
     merged.chat = unionById(state.chat, remote.chat).sort((x, y) => x.at - y.at).slice(-300);
-    merged.settings = state.settings;      // PIN·소리·주소는 이 기기 설정 유지
+    merged.settings = state.settings;      // 소리·주소는 이 기기 설정 유지
+    if (remote.settings) {                 // 가족 PIN은 가족 공통 설정이므로 원격 값을 따른다
+      merged.settings.pinEnabled = !!remote.settings.pinEnabled;
+      merged.settings.pinHash = remote.settings.pinHash || '';
+    }
     merged.members = Object.assign({}, remote.members || state.members);
     merged.moments = {};
     ['mom', 'dad', 'kid'].forEach((k) => {
