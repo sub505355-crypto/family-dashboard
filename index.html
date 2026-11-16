@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFF3E4">
 <title>인봉뿌 대시보드 🐱🐢</title>
-<meta name="description" content="공부 용돈 적립, 가족 랜덤 미션, 도장판, 가족 채팅, 공부 타이머까지 한 화면에 담은 인봉뿌 대시보드">
+<meta name="description" content="오늘 날씨와 안내, 공부 용돈 적립, 오늘의 한마디, 할 일, 가족 채팅, 공부 타이머까지 한 화면에 담은 인봉뿌 대시보드">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
@@ -70,29 +70,7 @@
     <path d="M58 48c2 2.6 10 2.6 12 0" fill="none" stroke="#5F9E80" stroke-width="2.2" stroke-linecap="round"/>
   </symbol>
 
-  <!-- 도장 : 고양이 -->
-  <symbol id="stamp-cat" viewBox="0 0 64 64">
-    <path d="M11 27 13 11 24 19Z" fill="currentColor"/>
-    <path d="M53 27 51 11 40 19Z" fill="currentColor"/>
-    <ellipse cx="32" cy="35" rx="21" ry="18.5" fill="currentColor"/>
-    <ellipse cx="25" cy="33" rx="2.6" ry="3.4" fill="#fff"/>
-    <ellipse cx="39" cy="33" rx="2.6" ry="3.4" fill="#fff"/>
-    <path d="M32 38.5v2" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-    <path d="M28.5 43c2 1.8 5 1.8 7 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M9 36h-5M10 41h-5M55 36h5M54 41h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  </symbol>
 
-  <!-- 도장 : 거북이 -->
-  <symbol id="stamp-turtle" viewBox="0 0 64 64">
-    <ellipse cx="32" cy="43" rx="23" ry="15" fill="currentColor"/>
-    <circle cx="32" cy="20" r="11.5" fill="currentColor"/>
-    <ellipse cx="28" cy="19" rx="2.3" ry="3" fill="#fff"/>
-    <ellipse cx="36" cy="19" rx="2.3" ry="3" fill="#fff"/>
-    <path d="M28.5 24.5c2.4 1.6 4.6 1.6 7 0" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    <path d="M20 43h24M32 34v18" stroke="#fff" stroke-width="2" opacity=".75"/>
-    <ellipse cx="6" cy="47" rx="4" ry="3" fill="currentColor"/>
-    <ellipse cx="58" cy="47" rx="4" ry="3" fill="currentColor"/>
-  </symbol>
 
   <!-- 파츠(참) -->
   <symbol id="part-star" viewBox="0 0 32 32"><path d="M16 3l3.6 8.2 8.9.8-6.7 5.9 2 8.7L16 22.2 8.2 26.6l2-8.7L3.5 12l8.9-.8z" fill="currentColor"/></symbol>
@@ -132,8 +110,6 @@
   <nav class="chips" id="chips" aria-label="메뉴">
     <a class="chip" href="#money">🪙 용돈</a>
     <a class="chip" href="#todos">🖐️ 할 일</a>
-    <a class="chip" href="#mission">🎲 미션</a>
-    <a class="chip" href="#stamp">🐾 도장판</a>
     <a class="chip" href="#chat">💬 채팅</a>
     <a class="chip" href="#timer">⏰ 타이머</a>
   </nav>
@@ -143,8 +119,8 @@
     <section class="hero">
       <div class="hero-text">
         <p class="hero-date" id="heroDate"></p>
-        <h1 id="heroTitle"><span id="heroKidName">현</span>, 오늘도 몽글몽글 🐱🐢</h1>
-        <p class="hero-sub" id="heroSub">공부도 미션도 하나씩 차곡차곡!</p>
+        <h1 id="heroTitle">현이의 하루😘</h1>
+        <p class="hero-sub" id="heroSub">오늘 하루를 기록해요</p>
       </div>
       <div class="hero-char">
         <svg class="hero-turtle" aria-hidden="true"><use href="#ch-turtle"/></svg>
@@ -161,8 +137,42 @@
           <strong class="stat-val" id="statTodo">0 / 0</strong>
         </div>
         <div class="stat">
-          <span class="stat-label">도장</span>
-          <strong class="stat-val" id="statStamp">0개</strong>
+          <span class="stat-label">한마디</span>
+          <strong class="stat-val" id="statMoment">0 / 3</strong>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- 오늘 날씨 -->
+    <section class="card wide weather" id="weather">
+      <div class="card-head">
+        <h2>🌤️ 오늘 날씨</h2>
+        <div class="place-switch" id="placeSwitch">
+          <button class="place on" data-place="gunpo">군포</button>
+          <button class="place" data-place="seoul">서울</button>
+        </div>
+      </div>
+      <div class="weather-body">
+        <div class="weather-now">
+          <span class="w-emoji" id="wEmoji">🌤️</span>
+          <div class="w-main">
+            <strong id="wTemp">--°</strong>
+            <span class="w-desc" id="wDesc">날씨를 불러오는 중이에요…</span>
+            <span class="w-sub" id="wSub"></span>
+          </div>
+          <button class="mini-btn" id="wRefresh">새로고침</button>
+        </div>
+        <div class="w-advice" id="wAdvice"></div>
+        <div class="w-manual" id="wManual" hidden>
+          <label for="wManualSel">직접 고르기</label>
+          <select id="wManualSel">
+            <option value="0">☀️ 맑음</option>
+            <option value="2">⛅ 구름 조금</option>
+            <option value="3">☁️ 흐림</option>
+            <option value="61">🌧️ 비</option>
+            <option value="71">❄️ 눈</option>
+          </select>
         </div>
       </div>
     </section>
@@ -186,6 +196,16 @@
         <ul class="history" id="historyList"></ul>
       </section>
 
+
+      <!-- 오늘의 한마디 -->
+      <section class="card wide" id="phrases">
+        <div class="card-head">
+          <h2>💌 오늘의 한마디</h2>
+          <span class="pill soft">엄마 · 아빠 · 현</span>
+        </div>
+        <p class="hint">한 줄씩 적어두면 하루가 차곡차곡 쌓여요. 적는 대로 자동 저장!</p>
+        <div class="phrase-grid" id="phraseGrid"></div>
+      </section>
       <!-- 3. 할 일 -->
       <section class="card" id="todos">
         <div class="card-head">
@@ -199,41 +219,6 @@
           <button class="primary" type="submit">추가</button>
         </form>
         <p class="hint center">모두 체크하면 하이파이브가 터져요! 🖐️✨</p>
-      </section>
-
-      <!-- 2. 랜덤 미션 -->
-      <section class="card" id="mission">
-        <div class="card-head">
-          <h2>🎲 오늘의 가족 미션</h2>
-          <span class="pill soft" id="missionPill">대기</span>
-        </div>
-        <div class="mission-box" id="missionBox">
-          <svg class="mission-char" aria-hidden="true"><use href="#ch-turtle"/></svg>
-          <p class="mission-text" id="missionText">뽑기 버튼을 눌러 오늘의 미션을 골라봐요!</p>
-          <div class="mission-actions">
-            <button class="primary" id="drawBtn">오늘 미션 뽑기</button>
-            <button class="soft" id="doneMissionBtn" hidden>미션 완료!</button>
-          </div>
-        </div>
-        <form class="add-row" id="missionForm">
-          <input id="missionInput" type="text" maxlength="40" placeholder="우리 가족만의 미션 추가" autocomplete="off">
-          <button class="primary" type="submit">추가</button>
-        </form>
-        <details class="pool">
-          <summary>미션 목록 <span id="poolCount"></span></summary>
-          <ul id="missionPool"></ul>
-        </details>
-      </section>
-
-      <!-- 4. 도장판 -->
-      <section class="card" id="stamp">
-        <div class="card-head">
-          <h2>🐾 <span id="stampKidName">현</span>의 미션 도장판</h2>
-          <span class="pill" id="stampPill">0개</span>
-        </div>
-        <p class="hint">미션을 완료하면 고양이·거북이 도장이 <b>쾅!</b></p>
-        <div class="stamp-board" id="stampBoard"></div>
-        <p class="stamp-note" id="stampNote">한 칸씩 채워보자!</p>
       </section>
 
       <!-- 5. 채팅 -->
@@ -365,7 +350,7 @@
 
       <h3 class="mini-title">효과음</h3>
       <label class="row-toggle">
-        <span>동전·도장·알람 소리</span>
+        <span>동전·알람 소리</span>
         <span class="switch"><input type="checkbox" id="soundToggle"><span class="slider"></span></span>
       </label>
 

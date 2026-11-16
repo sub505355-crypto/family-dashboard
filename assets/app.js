@@ -19,19 +19,6 @@
     kid: { emoji: '🐰', cls: 'kid' }
   };
 
-  const DEFAULT_MISSIONS = [
-    '가족이랑 사진 한 장 찍기 📸',
-    '엄마·아빠에게 사랑한다고 말하기 💗',
-    '책 5쪽 소리 내어 읽기 📖',
-    '오늘 기분 한 줄 일기 쓰기 ✏️',
-    '가족 중 한 명 도와주기 🤝',
-    '10분 동안 스트레칭 하기 🧘',
-    '산책 15분 다녀오기 🐾',
-    '노래 한 곡 같이 부르기 🎵',
-    '설거지 하나 돕기 🍽️',
-    '오늘 고마운 일 하나 말하기 🌼'
-  ];
-
   const STICKERS = ['🐱', '🐢', '😻', '🥰', '💗', '⭐', '🍒', '🌈', '🎉', '👏', '🍰', '🐣'];
   const PRAISE = ['최고야!', '사랑해', '고마워', '힘내!'];
 
@@ -55,10 +42,8 @@
       ],
       todoDay: dateKey(),
       lastHighFive: null,
-      missions: DEFAULT_MISSIONS.map((text) => ({ id: uid(), text })),
-      todayMission: null,
-      stamps: [],
       chat: [],
+      moments: { mom: { text: '', at: 0 }, dad: { text: '', at: 0 }, kid: { text: '', at: 0 } },
       me: 'mom',
       settings: { pinEnabled: false, pinHash: '', sound: true, syncUrl: '' },
       alarm: { time: '20:30', on: false },
@@ -74,8 +59,12 @@
     s.settings = Object.assign(base.settings, raw.settings || {});
     s.alarm = Object.assign(base.alarm, raw.alarm || {});
     s.timer = Object.assign(base.timer, raw.timer || {});
-    ['earnItems', 'history', 'todos', 'missions', 'stamps', 'chat'].forEach((k) => {
+    ['earnItems', 'history', 'todos', 'chat'].forEach((k) => {
       if (!Array.isArray(s[k])) s[k] = base[k];
+    });
+    s.moments = Object.assign({}, base.moments, raw.moments || {});
+    ['mom', 'dad', 'kid'].forEach((k) => {
+      s.moments[k] = Object.assign({ text: '', at: 0 }, s.moments[k] || {});
     });
     return s;
   }
@@ -123,16 +112,16 @@
     const d = new Date();
     const days = ['일', '월', '화', '수', '목', '금', '토'];
     $('#heroDate').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
-    $('#heroSub').textContent = `${(state.members.kid && state.members.kid.name) || '현'}, ${greet()}`;
     const done = state.todos.filter((t) => t.done).length;
     $('#statToday').textContent = won(todayEarned());
     $('#statTodo').textContent = `${done} / ${state.todos.length}`;
-    $('#statStamp').textContent = `${state.stamps.length}개`;
+    const filled = ['mom', 'dad', 'kid'].filter((k) => state.moments[k] && state.moments[k].text).length;
+    $('#statMoment').textContent = `${filled} / 3`;
   }
 
   function renderFamily() {
     const kidName = (state.members.kid && state.members.kid.name) || '현';
-    ['#walletKidName', '#todoKidName', '#stampKidName', '#heroKidName'].forEach((sel) => {
+    ['#walletKidName', '#todoKidName', '#stampKidName'].forEach((sel) => {
       const el = $(sel);
       if (el) el.textContent = kidName;
     });
@@ -289,122 +278,6 @@
         setTimeout(showHighFive, 260);
       }
     }
-  }
-
-  /* ---------------- 미션 ---------------- */
-  let rolling = false;
-
-  function renderMission() {
-    const m = state.todayMission;
-    const box = $('#missionBox');
-    const text = $('#missionText');
-    const doneBtn = $('#doneMissionBtn');
-    const drawBtn = $('#drawBtn');
-    const pill = $('#missionPill');
-
-    if (m) {
-      text.textContent = m.text;
-      box.classList.toggle('done', !!m.done);
-      doneBtn.hidden = !!m.done;
-      drawBtn.textContent = '다른 미션 뽑기';
-      pill.textContent = m.done ? '완료 🐾' : '진행 중';
-      pill.classList.toggle('soft', !m.done);
-    } else {
-      text.textContent = '뽑기 버튼을 눌러 오늘의 미션을 골라봐요!';
-      box.classList.remove('done');
-      doneBtn.hidden = true;
-      drawBtn.textContent = '오늘 미션 뽑기';
-      pill.textContent = '대기';
-      pill.classList.add('soft');
-    }
-
-    const ul = $('#missionPool');
-    ul.innerHTML = state.missions.map((x) =>
-      `<li><span>${esc(x.text)}</span><button data-m-del="${x.id}" aria-label="미션 삭제">✕</button></li>`
-    ).join('') || '<li><span>미션이 없어요</span></li>';
-    $('#poolCount').textContent = `(${state.missions.length})`;
-  }
-
-  function drawMission() {
-    if (rolling) return;
-    const pool = state.missions;
-    if (!pool.length) { toast('미션을 먼저 추가해 주세요 🐢'); return; }
-    rolling = true;
-    const text = $('#missionText');
-    text.classList.add('rolling');
-    let ticks = 0;
-    const spin = setInterval(() => {
-      text.textContent = pool[Math.floor(Math.random() * pool.length)].text;
-      playNotes([520 + Math.random() * 300], 'triangle', 0.03);
-      ticks += 1;
-      if (ticks > 14) {
-        clearInterval(spin);
-        rolling = false;
-        text.classList.remove('rolling');
-        const pick = pool[Math.floor(Math.random() * pool.length)];
-        state.todayMission = { id: pick.id, text: pick.text, at: Date.now(), done: false };
-        save();
-        renderMission();
-        text.classList.add('pop');
-        setTimeout(() => text.classList.remove('pop'), 500);
-        playNotes([659, 880], 'sine', 0.12);
-        toast('오늘의 미션은… ' + pick.text);
-      }
-    }, 90);
-  }
-
-  function completeMission() {
-    const m = state.todayMission;
-    if (!m || m.done) return;
-    m.done = true;
-    m.doneAt = Date.now();
-    const char = state.stamps.length % 2 === 0 ? 'cat' : 'turtle';
-    state.stamps.push({ id: uid(), char, at: Date.now(), text: m.text });
-    save();
-    renderMission();
-    renderStamps(true);
-    renderHero();
-    playNotes([392, 523.3, 659.3], 'square', 0.1);
-    toast('미션 완료! 도장이 쾅 찍혔어요 🐾');
-    setTimeout(() => {
-      $('#stamp').scrollIntoView({ behavior: 'smooth', block: 'center' });
-      $('#stampBoard').classList.add('glow');
-      setTimeout(() => $('#stampBoard').classList.remove('glow'), 900);
-    }, 300);
-  }
-
-  /* ---------------- 도장판 ---------------- */
-  function renderStamps(animateLast) {
-    const board = $('#stampBoard');
-    board.innerHTML = '';
-    const total = state.stamps.length;
-    const page = Math.floor(total / 20);
-    const items = state.stamps.slice(page * 20, page * 20 + 20);
-
-    for (let i = 0; i < 20; i++) {
-      const slot = document.createElement('div');
-      slot.className = 'stamp-slot';
-      const st = items[i];
-      if (st) {
-        slot.classList.add('filled');
-        if (st.char === 'turtle') slot.classList.add('turtle');
-        slot.innerHTML = `<svg aria-hidden="true"><use href="#stamp-${st.char === 'turtle' ? 'turtle' : 'cat'}"></use></svg>`;
-        if (animateLast && i === items.length - 1) {
-          slot.classList.add('bang');
-        }
-      } else {
-        slot.innerHTML = `<span class="slot-num">${page * 20 + i + 1}</span>`;
-      }
-      board.appendChild(slot);
-    }
-
-    const inPage = items.length;
-    $('#stampPill').textContent = `${total}개`;
-    const note = $('#stampNote');
-    if (total === 0) note.innerHTML = '한 칸씩 채워보자! 첫 도장을 기다리는 중 🐾';
-    else if (inPage === 20) note.innerHTML = `<b>도장판 ${page + 1}장 완성!</b> 🎉 다음 판이 새로 시작돼요.`;
-    else if (inPage >= 15) note.innerHTML = `도장 <b>${inPage}/20</b> — 얼마 안 남았어요! ✨`;
-    else note.innerHTML = `이번 판 <b>${inPage}/20</b> · 지금까지 <b>${total}개</b>`;
   }
 
   /* ---------------- 채팅 ---------------- */
@@ -742,6 +615,7 @@
     renderFamily();
     renderWho();
     renderChat();
+    renderPhrases();
     toast('이름을 저장했어요 🐾');
   }
 
@@ -775,9 +649,14 @@
     const merged = Object.assign({}, state, remote);
     merged.history = unionById(state.history, remote.history).sort((x, y) => y.at - x.at).slice(0, 80);
     merged.chat = unionById(state.chat, remote.chat).sort((x, y) => x.at - y.at).slice(-300);
-    merged.stamps = unionById(state.stamps, remote.stamps).sort((x, y) => x.at - y.at);
     merged.settings = state.settings;      // PIN·소리·주소는 이 기기 설정 유지
     merged.members = Object.assign({}, remote.members || state.members);
+    merged.moments = {};
+    ['mom', 'dad', 'kid'].forEach((k) => {
+      const l = (state.moments && state.moments[k]) || { text: '', at: 0 };
+      const r = (remote.moments && remote.moments[k]) || { text: '', at: 0 };
+      merged.moments[k] = (r.at || 0) > (l.at || 0) ? r : l;
+    });
     merged.updatedAt = Math.max(state.updatedAt || 0, remote.updatedAt || 0);
     return merged;
   }
@@ -838,6 +717,205 @@
     }
   }
 
+  /* ---------------- 오늘의 한마디 ---------------- */
+  const PHRASE_PLACEHOLDER = {
+    mom: '오늘 엄마의 한마디를 적어보세요 ✏️',
+    dad: '오늘 아빠의 한마디를 적어보세요 ✏️',
+    kid: '오늘 현의 한마디를 적어보세요 ✏️'
+  };
+  const phraseTimers = {};
+
+  function renderPhrases() {
+    const grid = $('#phraseGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    ['mom', 'dad', 'kid'].forEach((k) => {
+      const m = (state.moments && state.moments[k]) || { text: '', at: 0 };
+      const card = document.createElement('div');
+      card.className = 'phrase-card p-' + k;
+      card.dataset.who = k;
+      card.innerHTML = `
+        <div class="phrase-head">
+          <span class="p-face">${MEMBERS[k].emoji}</span>
+          <span class="p-name">${esc(state.members[k].name)}</span>
+          <span class="p-time">${m.at ? timeText(m.at) : ''}</span>
+        </div>
+        <textarea maxlength="80" placeholder="${PHRASE_PLACEHOLDER[k]}">${esc(m.text)}</textarea>
+        <div class="phrase-foot"><button class="soft" data-phrase-save="${k}">저장</button></div>
+        <span class="phrase-saved">저장됨 ✓</span>`;
+      grid.appendChild(card);
+    });
+  }
+
+  function savePhrase(who, text, notify) {
+    const clean = String(text || '').slice(0, 80);
+    const prev = state.moments[who] || { text: '', at: 0 };
+    if (prev.text === clean && prev.at) { if (notify) toast('이미 저장되어 있어요 🐾'); return; }
+    state.moments[who] = { text: clean, at: Date.now() };
+    save();
+    const card = $(`.phrase-card[data-who="${who}"]`);
+    if (card) {
+      const t = $('.p-time', card);
+      if (t) t.textContent = timeText(state.moments[who].at);
+      const chip = $('.phrase-saved', card);
+      if (chip) { chip.classList.add('on'); setTimeout(() => chip.classList.remove('on'), 1500); }
+    }
+    if (notify) { playNotes([740, 988], 'sine', 0.09); toast('한마디를 저장했어요 💌'); }
+  }
+
+  /* ---------------- 오늘 날씨 (Open-Meteo) ---------------- */
+  const WKEY = 'inbongppu-weather-v1';
+  const PLACES = {
+    gunpo: { name: '군포', lat: 37.3617, lon: 126.9352 },
+    seoul: { name: '서울', lat: 37.5665, lon: 126.9780 }
+  };
+  const WMO = {
+    0: ['☀️', '맑음'], 1: ['🌤️', '대체로 맑음'], 2: ['⛅', '구름 조금'], 3: ['☁️', '흐림'],
+    45: ['🌫️', '안개'], 48: ['🌫️', '안개'], 51: ['🌦️', '약한 이슬비'], 53: ['🌦️', '이슬비'], 55: ['🌦️', '이슬비'],
+    56: ['🌧️', '어는 이슬비'], 57: ['🌧️', '어는 이슬비'], 61: ['🌧️', '약한 비'], 63: ['🌧️', '비'], 65: ['🌧️', '강한 비'],
+    66: ['🌧️', '어는 비'], 67: ['🌧️', '어는 비'], 71: ['🌨️', '약한 눈'], 73: ['🌨️', '눈'], 75: ['❄️', '많은 눈'],
+    77: ['🌨️', '싸락눈'], 80: ['🌦️', '소나기'], 81: ['🌦️', '소나기'], 82: ['⛈️', '강한 소나기'],
+    85: ['🌨️', '소낙눈'], 86: ['❄️', '강한 소낙눈'], 95: ['⛈️', '천둥번개'], 96: ['⛈️', '천둥번개'], 99: ['⛈️', '천둥번개']
+  };
+  const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
+
+  let wstate = loadWeatherState();
+
+  function loadWeatherState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(WKEY) || 'null');
+      if (raw && typeof raw === 'object') {
+        return Object.assign({ place: 'gunpo', cache: null, hidden: { date: '', keys: [] }, manual: null }, raw);
+      }
+    } catch (e) { /* 무시 */ }
+    return { place: 'gunpo', cache: null, hidden: { date: '', keys: [] }, manual: null };
+  }
+
+  function saveW() {
+    try { localStorage.setItem(WKEY, JSON.stringify(wstate)); } catch (e) { /* 무시 */ }
+  }
+
+  function pmGrade(v) { return v <= 30 ? '좋음' : v <= 80 ? '보통' : v <= 150 ? '나쁨' : '매우 나쁨'; }
+  function pm25Grade(v) { return v <= 15 ? '좋음' : v <= 35 ? '보통' : v <= 75 ? '나쁨' : '매우 나쁨'; }
+
+  function computeTips(d) {
+    const tips = [];
+    if (!d) return tips;
+    const rainy = RAIN_CODES.includes(Number(d.code));
+    if (rainy || (d.prob != null && d.prob >= 50)) tips.push({ k: 'umbrella', text: '우산 챙기기 ☂️', cls: 'umbrella' });
+    if ((d.tmin != null && d.tmin <= 10) || (d.temp != null && d.temp <= 8)) tips.push({ k: 'warm', text: '따뜻하게 입기 🧥', cls: 'warm' });
+    if ((d.pm25 != null && d.pm25 >= 36) || (d.pm10 != null && d.pm10 >= 81)) tips.push({ k: 'mask', text: '마스크 쓰기 😷', cls: 'mask' });
+    if ((d.temp != null && d.temp >= 26) || (d.humidity != null && d.humidity < 40)) tips.push({ k: 'water', text: '물 많이 마시기 💧', cls: 'water' });
+    return tips;
+  }
+
+  function renderAdvice(data) {
+    const box = $('#wAdvice');
+    if (!box) return;
+    const today = dateKey();
+    if (wstate.hidden.date !== today) { wstate.hidden = { date: today, keys: [] }; saveW(); }
+    const tips = computeTips(data);
+    box.innerHTML = '';
+    if (!tips.length) {
+      box.innerHTML = '<span class="tip-empty">오늘은 가볍게 나서도 좋아요 🌈</span>';
+      return;
+    }
+    const visible = tips.filter((t) => !wstate.hidden.keys.includes(t.k));
+    visible.forEach((t) => {
+      const el = document.createElement('span');
+      el.className = 'tip ' + t.cls;
+      el.innerHTML = `${esc(t.text)}<button class="tip-x" data-tip="${t.k}" aria-label="안내 숨기기">✕</button>`;
+      box.appendChild(el);
+    });
+    if (!visible.length || wstate.hidden.keys.length) {
+      const b = document.createElement('button');
+      b.className = 'w-again';
+      b.id = 'wAgain';
+      b.textContent = visible.length ? '숨긴 안내 다시 보기' : '안내 다시 보기';
+      box.appendChild(b);
+    }
+  }
+
+  function renderWeather(data, stale) {
+    if (!data) return;
+    const pair = WMO[Number(data.code)] || ['🌤️', '오늘 날씨'];
+    $('#wEmoji').textContent = pair[0];
+    $('#wDesc').textContent = (data.manual ? '직접 고른 날씨 · ' : '') + pair[1];
+    $('#wTemp').textContent = data.temp == null ? '' : data.temp + '°';
+    const bits = [];
+    if (data.tmax != null && data.tmin != null) bits.push(`최고 ${data.tmax}° · 최저 ${data.tmin}°`);
+    if (data.prob != null) bits.push(`강수 ${data.prob}%`);
+    if (data.pm10 != null) bits.push(`미세먼지 ${pmGrade(data.pm10)}`);
+    if (data.pm25 != null) bits.push(`초미세 ${pm25Grade(data.pm25)}`);
+    if (data.humidity != null) bits.push(`습도 ${data.humidity}%`);
+    if (stale) bits.push('저장된 값');
+    $('#wSub').textContent = bits.join(' · ') || (data.manual ? '직접 고른 날씨' : '');
+    if (data.manual) $('#wManual').hidden = false;
+    renderAdvice(data);
+  }
+
+  async function fetchWeather(force) {
+    const place = PLACES[wstate.place] || PLACES.gunpo;
+    const cache = wstate.cache;
+    if (!force && !wstate.manual && cache && cache.place === wstate.place && cache.data && Date.now() - cache.at < 20 * 60 * 1000) {
+      renderWeather(cache.data);
+      return;
+    }
+    $('#wDesc').textContent = '날씨를 불러오는 중이에요…';
+    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FSeoul&forecast_days=1`;
+    const aUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${place.lat}&longitude=${place.lon}&current=pm10,pm2_5&timezone=Asia%2FSeoul`;
+    try {
+      const wres = await fetch(wUrl, { cache: 'no-store' });
+      if (!wres.ok) throw new Error('weather ' + wres.status);
+      const w = await wres.json();
+      let air = null;
+      try {
+        const ares = await fetch(aUrl, { cache: 'no-store' });
+        if (ares.ok) air = await ares.json();
+      } catch (e) { /* 미세먼지는 없어도 괜찮아요 */ }
+      const data = {
+        temp: Math.round(w.current.temperature_2m),
+        code: w.current.weather_code,
+        humidity: Math.round(w.current.relative_humidity_2m),
+        precip: w.current.precipitation,
+        tmax: Math.round(w.daily.temperature_2m_max[0]),
+        tmin: Math.round(w.daily.temperature_2m_min[0]),
+        prob: w.daily.precipitation_probability_max ? w.daily.precipitation_probability_max[0] : null,
+        pm10: air && air.current && air.current.pm10 != null ? Math.round(air.current.pm10) : null,
+        pm25: air && air.current && air.current.pm2_5 != null ? Math.round(air.current.pm2_5) : null,
+        at: Date.now(),
+        manual: false
+      };
+      wstate.cache = { place: wstate.place, at: Date.now(), data };
+      wstate.manual = null;
+      saveW();
+      $('#wManual').hidden = true;
+      renderWeather(data);
+    } catch (e) {
+      if (cache && cache.data && cache.place === wstate.place) {
+        renderWeather(cache.data, true);
+        return;
+      }
+      $('#wEmoji').textContent = '🌫️';
+      $('#wTemp').textContent = '';
+      $('#wDesc').textContent = '날씨를 불러오지 못했어요';
+      $('#wSub').textContent = '아래에서 직접 골라주세요';
+      $('#wManual').hidden = false;
+      $('#wAdvice').innerHTML = '<span class="tip-empty">직접 고른 날씨로 안내를 보여드릴게요 🐢</span>';
+    }
+  }
+
+  function setPlace(place) {
+    if (!PLACES[place]) return;
+    wstate.place = place;
+    wstate.cache = null;
+    wstate.manual = null;
+    saveW();
+    $$('#placeSwitch .place').forEach((b) => b.classList.toggle('on', b.dataset.place === place));
+    $('#wManual').hidden = true;
+    fetchWeather(true);
+  }
+
   /* ---------------- 렌더 ---------------- */
   function renderAll() {
     renderHero();
@@ -846,10 +924,9 @@
     renderEarn();
     renderHistory();
     renderTodos();
-    renderMission();
-    renderStamps();
     renderWho();
     renderChat();
+    renderPhrases();
     renderTimerStatic();
   }
 
@@ -959,26 +1036,60 @@
       playNotes([700], 'sine', 0.08);
     });
 
-    // 미션
-    $('#drawBtn').addEventListener('click', drawMission);
-    $('#doneMissionBtn').addEventListener('click', completeMission);
-    $('#missionForm').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = $('#missionInput');
-      const text = input.value.trim();
-      if (!text) return;
-      state.missions.push({ id: uid(), text });
-      input.value = '';
-      save();
-      renderMission();
-      toast('미션을 추가했어요 🎲');
+    // 오늘의 한마디
+    const grid = $('#phraseGrid');
+    grid.addEventListener('input', (e) => {
+      const ta = e.target.closest('textarea');
+      if (!ta) return;
+      const who = ta.closest('.phrase-card').dataset.who;
+      clearTimeout(phraseTimers[who]);
+      phraseTimers[who] = setTimeout(() => savePhrase(who, ta.value, false), 700);
     });
-    $('#missionPool').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-m-del]');
+    grid.addEventListener('focusout', (e) => {
+      const ta = e.target.closest('textarea');
+      if (!ta) return;
+      const who = ta.closest('.phrase-card').dataset.who;
+      clearTimeout(phraseTimers[who]);
+      savePhrase(who, ta.value, false);
+    });
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-phrase-save]');
       if (!btn) return;
-      state.missions = state.missions.filter((m) => m.id !== btn.dataset.mDel);
-      save();
-      renderMission();
+      const who = btn.dataset.phraseSave;
+      const card = btn.closest('.phrase-card');
+      savePhrase(who, $('textarea', card).value, true);
+    });
+
+    // 날씨
+    $('#placeSwitch').addEventListener('click', (e) => {
+      const b = e.target.closest('.place');
+      if (!b) return;
+      setPlace(b.dataset.place);
+    });
+    $('#wRefresh').addEventListener('click', () => { playNotes([880], 'sine', 0.07, 0.1); fetchWeather(true); });
+    $('#wAdvice').addEventListener('click', (e) => {
+      const x = e.target.closest('[data-tip]');
+      if (x) {
+        const k = x.dataset.tip;
+        if (wstate.hidden.date !== dateKey()) wstate.hidden = { date: dateKey(), keys: [] };
+        if (!wstate.hidden.keys.includes(k)) wstate.hidden.keys.push(k);
+        saveW();
+        const card = wstate.cache && wstate.cache.data;
+        renderAdvice(card || (wstate.manual ? { code: wstate.manual.code } : null));
+        return;
+      }
+      if (e.target.closest('#wAgain')) {
+        wstate.hidden = { date: dateKey(), keys: [] };
+        saveW();
+        const card = wstate.cache && wstate.cache.data;
+        renderAdvice(card || (wstate.manual ? { code: wstate.manual.code } : null));
+      }
+    });
+    $('#wManualSel').addEventListener('change', () => {
+      const code = Number($('#wManualSel').value) || 0;
+      wstate.manual = { code, at: Date.now() };
+      saveW();
+      renderWeather({ manual: true, code, temp: null, at: Date.now() });
     });
 
     // 채팅
@@ -1160,7 +1271,6 @@
       state.todos.forEach((x) => { x.done = false; });
       state.todoDay = t;
       state.lastHighFive = null;
-      state.todayMission = null;
       save();
     }
 
@@ -1170,6 +1280,7 @@
     updateAlarmHint();
     bind();
     setInterval(checkAlarm, 1000);
+    fetchWeather(false);
 
     if (state.settings.pinEnabled && state.settings.pinHash) showLock();
 
