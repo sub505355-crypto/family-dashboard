@@ -14,9 +14,9 @@
   const timeText = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 
   const MEMBERS = {
-    mom: { av: 'av-mom', cls: 'mom' },
-    dad: { av: 'av-dad', cls: 'dad' },
-    kid: { av: 'av-kid', cls: 'kid' }
+    mom: { av: 'av-mom', cls: 'mom', fallback: '엄마' },
+    dad: { av: 'av-dad', cls: 'dad', fallback: '아빠' },
+    kid: { av: 'av-kid', cls: 'kid', fallback: '현' }
   };
   const avHTML = (k, cls = 'av') => `<svg class="${cls}" aria-hidden="true"><use href="#${MEMBERS[k].av}"></use></svg>`;
 
@@ -103,6 +103,39 @@
   function save(push = true) {
     state.updatedAt = Date.now();
     persist(push);
+  }
+
+  /* ---------------- 누가 기록했는지 ---------------- */
+  const memberName = (k) => {
+    const m = state.members && state.members[k];
+    return (m && m.name) || (MEMBERS[k] ? MEMBERS[k].fallback : k) || k;
+  };
+
+  // 용돈 내역 한 줄에 붙는 "누가 입력했는지" 배지. by가 없는 예전 기록은 배지를 생략한다.
+  function byBadge(k) {
+    if (!k || !MEMBERS[k]) return '';
+    return `<span class="h-by ${MEMBERS[k].cls}" title="${esc(memberName(k))} 기록">${avHTML(k, 'av')}<span class="h-by-name">${esc(memberName(k))}</span></span>`;
+  }
+
+  function setMe(k) {
+    if (!MEMBERS[k] || state.me === k) return;
+    state.me = k;
+    save();
+    renderWho();
+    renderChat();
+    renderMoneyWho();
+    playNotes([700], 'sine', 0.07);
+    toast(`지금부터 ${memberName(k)} 이름으로 기록해요 ✍️`);
+  }
+
+  function renderMoneyWho() {
+    const box = $('#moneyWhoBtns');
+    if (!box) return;
+    box.innerHTML = ['mom', 'dad', 'kid'].map((k) =>
+      `<button class="rec-btn ${MEMBERS[k].cls} ${state.me === k ? 'on' : ''}" type="button" data-rec="${k}" aria-pressed="${state.me === k ? 'true' : 'false'}">
+        ${avHTML(k, 'av')}<span>${esc(memberName(k))}</span>
+      </button>`
+    ).join('');
   }
 
   const balance = () => state.history.reduce((sum, h) => sum + (h.type === 'spend' ? -h.amount : h.amount), 0);
@@ -202,7 +235,7 @@
   function earnItem(id, ev, btn) {
     const item = state.earnItems.find((i) => i.id === id);
     if (!item) return;
-    const entry = { id: uid(), type: 'earn', name: item.name, amount: Number(item.amount) || 0, at: Date.now() };
+    const entry = { id: uid(), type: 'earn', name: item.name, amount: Number(item.amount) || 0, at: Date.now(), by: state.me };
     state.history.unshift(entry);
     state.history = state.history.slice(0, 80);
     markSeen('h:' + entry.id);
@@ -238,6 +271,7 @@
         li.dataset.id = h.id;
       } else {
         li.innerHTML = `
+          ${byBadge(h.by)}
           <span class="h-name">${esc(h.name)}</span>
           <span class="h-time">${timeText(h.at)}</span>
           <strong class="h-amt ${spend ? 'spend' : ''}">${spend ? '−' : '+'}${won(h.amount)}</strong>
@@ -698,6 +732,8 @@
     renderWho();
     renderChat();
     renderPhrases();
+    renderMoneyWho();
+    renderHistory();
     toast('이름을 저장했어요 🐾');
   }
 
@@ -915,6 +951,7 @@
   function renderAll() {
     renderHero();
     renderFamily();
+    renderMoneyWho();
     renderMoney();
     renderEarn();
     renderHistory();
@@ -973,7 +1010,7 @@
       const amount = Math.max(0, Number(String(input).replace(/[^0-9]/g, '')) || 0);
       if (!amount) { toast('금액을 숫자로 적어주세요 🐢'); return; }
       const memo = prompt('무엇에 썼나요? (예: 문구점)', '간식') || '사용';
-      const entry = { id: uid(), type: 'spend', name: memo, amount, at: Date.now() };
+      const entry = { id: uid(), type: 'spend', name: memo, amount, at: Date.now(), by: state.me };
       state.history.unshift(entry);
       markSeen('h:' + entry.id);
       save();
@@ -1057,14 +1094,19 @@
       }
     });
 
+    // 용돈 카드의 "지금 기록" 전환
+    const moneyWho = $('#moneyWho');
+    if (moneyWho) {
+      moneyWho.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-rec]');
+        if (b) setMe(b.dataset.rec);
+      });
+    }
+
     // 채팅
     $('#whoSwitch').addEventListener('click', (e) => {
       const b = e.target.closest('[data-me]');
-      if (!b) return;
-      state.me = b.dataset.me;
-      save();
-      renderWho();
-      renderChat();
+      if (b) setMe(b.dataset.me);
     });
     $('#stickerBtn').addEventListener('click', () => {
       const tray = $('#stickerTray');
