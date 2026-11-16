@@ -1,4 +1,4 @@
-/* ===== 몽글 가족 대시보드 ===== */
+/* ===== 인봉뿌 대시보드 ===== */
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
@@ -614,11 +614,12 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
 
 @media (min-width: 720px) {
   .phrase-grid { grid-template-columns: repeat(3, 1fr); }
-  .weather-now { gap: 16px; }
+  .weather-now { gap: 16px; flex: 0 1 auto; }
   .w-emoji { font-size: 54px; }
   #wTemp { font-size: 36px; }
-  .weather .weather-body { flex-direction: row; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
-  .w-advice { justify-content: flex-end; max-width: 60%; }
+  .w-main { flex: 0 1 auto; }
+  .weather .weather-body { flex-direction: row; align-items: center; gap: 16px; flex-wrap: nowrap; }
+  .w-advice { margin-left: auto; justify-content: flex-end; max-width: 55%; }
 }
 
 /* ---------- 애니메이션 ---------- */
@@ -662,6 +663,9 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
   .hero h1 { font-size: 31px; }
   .stat-val { font-size: 18px; }
   .grid { grid-template-columns: 1fr 1fr; gap: 18px; }
+  #money { grid-column: 1; grid-row: 1; }
+  #todos { grid-column: 2; grid-row: 1; }
+  #phrases { grid-column: 1 / -1; grid-row: 2; }
   .card { padding: 22px 20px; }
   .card-head h2 { font-size: 20px; }
   .timer-grid { grid-template-columns: 1.05fr 1fr; align-items: center; }

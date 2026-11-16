@@ -99,15 +99,6 @@
   };
 
   /* ---------------- 날짜 · 인사 ---------------- */
-  function greet() {
-    const h = new Date().getHours();
-    if (h < 6) return '늦은 밤에도 반가워요 🌙';
-    if (h < 11) return '좋은 아침이에요 ☀️';
-    if (h < 17) return '몽글몽글한 오후예요 🍰';
-    if (h < 22) return '오늘도 수고 많았어요 🌷';
-    return '내일도 같이 해요 🌙';
-  }
-
   function renderHero() {
     const d = new Date();
     const days = ['일', '월', '화', '수', '목', '금', '토'];
