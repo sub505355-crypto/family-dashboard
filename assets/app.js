@@ -709,202 +709,64 @@
   }
 
   /* ---------------- 오늘의 한마디 ---------------- */
-  const PHRASE_PLACEHOLDER = {
-    mom: '오늘 엄마의 한마디를 적어보세요 ✏️',
-    dad: '오늘 아빠의 한마디를 적어보세요 ✏️',
-    kid: '오늘 현의 한마디를 적어보세요 ✏️'
-  };
-  const phraseTimers = {};
+  function phraseRow(who) { return $(`.phrase-row[data-who="${who}"]`); }
+
+  function setPhraseStatus(text) {
+    const el = $('#phraseStatus');
+    if (el) el.textContent = text;
+  }
 
   function renderPhrases() {
-    const grid = $('#phraseGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
     ['mom', 'dad', 'kid'].forEach((k) => {
+      const row = phraseRow(k);
+      if (!row) return;
       const m = (state.moments && state.moments[k]) || { text: '', at: 0 };
-      const card = document.createElement('div');
-      card.className = 'phrase-card p-' + k;
-      card.dataset.who = k;
-      card.innerHTML = `
-        <div class="phrase-head">
-          <span class="p-face">${MEMBERS[k].emoji}</span>
-          <span class="p-name">${esc(state.members[k].name)}</span>
-          <span class="p-time">${m.at ? timeText(m.at) : ''}</span>
-        </div>
-        <textarea maxlength="80" placeholder="${PHRASE_PLACEHOLDER[k]}">${esc(m.text)}</textarea>
-        <div class="phrase-foot"><button class="soft" data-phrase-save="${k}">저장</button></div>
-        <span class="phrase-saved">저장됨 ✓</span>`;
-      grid.appendChild(card);
+      const input = $('.p-input', row);
+      if (input && document.activeElement !== input) input.value = m.text || '';
+      const name = $('.p-name', row);
+      if (name && state.members[k]) name.textContent = state.members[k].name;
+      const ph = $('.p-input', row);
+      if (ph) ph.placeholder = `오늘 ${(state.members[k] && state.members[k].name) || ''}의 한마디`;
     });
   }
 
   function savePhrase(who, text, notify) {
-    const clean = String(text || '').slice(0, 80);
+    const clean = String(text || '').trim().slice(0, 80);
     const prev = state.moments[who] || { text: '', at: 0 };
-    if (prev.text === clean && prev.at) { if (notify) toast('이미 저장되어 있어요 🐾'); return; }
+    if (prev.text === clean && prev.at && notify) {
+      setPhraseStatus('이미 저장되어 있어요 🐾');
+      return;
+    }
     state.moments[who] = { text: clean, at: Date.now() };
     save();
-    const card = $(`.phrase-card[data-who="${who}"]`);
-    if (card) {
-      const t = $('.p-time', card);
-      if (t) t.textContent = timeText(state.moments[who].at);
-      const chip = $('.phrase-saved', card);
-      if (chip) { chip.classList.add('on'); setTimeout(() => chip.classList.remove('on'), 1500); }
+    renderHero();
+    const row = phraseRow(who);
+    if (row) {
+      row.classList.remove('saved');
+      void row.offsetWidth;
+      row.classList.add('saved');
     }
-    if (notify) { playNotes([740, 988], 'sine', 0.09); toast('한마디를 저장했어요 💌'); }
-  }
-
-  /* ---------------- 오늘 날씨 (Open-Meteo) ---------------- */
-  const WKEY = 'inbongppu-weather-v1';
-  const PLACES = {
-    gunpo: { name: '군포', lat: 37.3617, lon: 126.9352 },
-    seoul: { name: '서울', lat: 37.5665, lon: 126.9780 }
-  };
-  const WMO = {
-    0: ['☀️', '맑음'], 1: ['🌤️', '대체로 맑음'], 2: ['⛅', '구름 조금'], 3: ['☁️', '흐림'],
-    45: ['🌫️', '안개'], 48: ['🌫️', '안개'], 51: ['🌦️', '약한 이슬비'], 53: ['🌦️', '이슬비'], 55: ['🌦️', '이슬비'],
-    56: ['🌧️', '어는 이슬비'], 57: ['🌧️', '어는 이슬비'], 61: ['🌧️', '약한 비'], 63: ['🌧️', '비'], 65: ['🌧️', '강한 비'],
-    66: ['🌧️', '어는 비'], 67: ['🌧️', '어는 비'], 71: ['🌨️', '약한 눈'], 73: ['🌨️', '눈'], 75: ['❄️', '많은 눈'],
-    77: ['🌨️', '싸락눈'], 80: ['🌦️', '소나기'], 81: ['🌦️', '소나기'], 82: ['⛈️', '강한 소나기'],
-    85: ['🌨️', '소낙눈'], 86: ['❄️', '강한 소낙눈'], 95: ['⛈️', '천둥번개'], 96: ['⛈️', '천둥번개'], 99: ['⛈️', '천둥번개']
-  };
-  const RAIN_CODES = [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99];
-
-  let wstate = loadWeatherState();
-
-  function loadWeatherState() {
-    try {
-      const raw = JSON.parse(localStorage.getItem(WKEY) || 'null');
-      if (raw && typeof raw === 'object') {
-        return Object.assign({ place: 'gunpo', cache: null, hidden: { date: '', keys: [] }, manual: null }, raw);
-      }
-    } catch (e) { /* 무시 */ }
-    return { place: 'gunpo', cache: null, hidden: { date: '', keys: [] }, manual: null };
-  }
-
-  function saveW() {
-    try { localStorage.setItem(WKEY, JSON.stringify(wstate)); } catch (e) { /* 무시 */ }
-  }
-
-  function pmGrade(v) { return v <= 30 ? '좋음' : v <= 80 ? '보통' : v <= 150 ? '나쁨' : '매우 나쁨'; }
-  function pm25Grade(v) { return v <= 15 ? '좋음' : v <= 35 ? '보통' : v <= 75 ? '나쁨' : '매우 나쁨'; }
-
-  function computeTips(d) {
-    const tips = [];
-    if (!d) return tips;
-    const rainy = RAIN_CODES.includes(Number(d.code));
-    if (rainy || (d.prob != null && d.prob >= 50)) tips.push({ k: 'umbrella', text: '우산 챙기기 ☂️', cls: 'umbrella' });
-    if ((d.tmin != null && d.tmin <= 10) || (d.temp != null && d.temp <= 8)) tips.push({ k: 'warm', text: '따뜻하게 입기 🧥', cls: 'warm' });
-    if ((d.pm25 != null && d.pm25 >= 36) || (d.pm10 != null && d.pm10 >= 81)) tips.push({ k: 'mask', text: '마스크 쓰기 😷', cls: 'mask' });
-    if ((d.temp != null && d.temp >= 26) || (d.humidity != null && d.humidity < 40)) tips.push({ k: 'water', text: '물 많이 마시기 💧', cls: 'water' });
-    return tips;
-  }
-
-  function renderAdvice(data) {
-    const box = $('#wAdvice');
-    if (!box) return;
-    const today = dateKey();
-    if (wstate.hidden.date !== today) { wstate.hidden = { date: today, keys: [] }; saveW(); }
-    const tips = computeTips(data);
-    box.innerHTML = '';
-    if (!tips.length) {
-      box.innerHTML = '<span class="tip-empty">오늘은 가볍게 나서도 좋아요 🌈</span>';
-      return;
-    }
-    const visible = tips.filter((t) => !wstate.hidden.keys.includes(t.k));
-    visible.forEach((t) => {
-      const el = document.createElement('span');
-      el.className = 'tip ' + t.cls;
-      el.innerHTML = `${esc(t.text)}<button class="tip-x" data-tip="${t.k}" aria-label="안내 숨기기">✕</button>`;
-      box.appendChild(el);
-    });
-    if (!visible.length || wstate.hidden.keys.length) {
-      const b = document.createElement('button');
-      b.className = 'w-again';
-      b.id = 'wAgain';
-      b.textContent = visible.length ? '숨긴 안내 다시 보기' : '안내 다시 보기';
-      box.appendChild(b);
+    const name = (state.members[who] && state.members[who].name) || who;
+    if (notify) {
+      playNotes([740, 988], 'sine', 0.09);
+      setPhraseStatus(clean ? `${name} 한마디를 저장했어요 · ${timeText(Date.now())}` : `${name} 칸을 비웠어요`);
+    } else {
+      setPhraseStatus(`${name} 한마디를 저장했어요 · ${timeText(Date.now())}`);
     }
   }
 
-  function renderWeather(data, stale) {
-    if (!data) return;
-    const pair = WMO[Number(data.code)] || ['🌤️', '오늘 날씨'];
-    $('#wEmoji').textContent = pair[0];
-    $('#wDesc').textContent = (data.manual ? '직접 고른 날씨 · ' : '') + pair[1];
-    $('#wTemp').textContent = data.temp == null ? '' : data.temp + '°';
-    const bits = [];
-    if (data.tmax != null && data.tmin != null) bits.push(`최고 ${data.tmax}° · 최저 ${data.tmin}°`);
-    if (data.prob != null) bits.push(`강수 ${data.prob}%`);
-    if (data.pm10 != null) bits.push(`미세먼지 ${pmGrade(data.pm10)}`);
-    if (data.pm25 != null) bits.push(`초미세 ${pm25Grade(data.pm25)}`);
-    if (data.humidity != null) bits.push(`습도 ${data.humidity}%`);
-    if (stale) bits.push('저장된 값');
-    $('#wSub').textContent = bits.join(' · ') || (data.manual ? '직접 고른 날씨' : '');
-    if (data.manual) $('#wManual').hidden = false;
-    renderAdvice(data);
-  }
-
-  async function fetchWeather(force) {
-    const place = PLACES[wstate.place] || PLACES.gunpo;
-    const cache = wstate.cache;
-    if (!force && !wstate.manual && cache && cache.place === wstate.place && cache.data && Date.now() - cache.at < 20 * 60 * 1000) {
-      renderWeather(cache.data);
-      return;
+  function deletePhrase(who) {
+    state.moments[who] = { text: '', at: Date.now() };
+    save();
+    renderHero();
+    const row = phraseRow(who);
+    if (row) {
+      const input = $('.p-input', row);
+      if (input) input.value = '';
     }
-    $('#wDesc').textContent = '날씨를 불러오는 중이에요…';
-    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${place.lat}&longitude=${place.lon}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FSeoul&forecast_days=1`;
-    const aUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${place.lat}&longitude=${place.lon}&current=pm10,pm2_5&timezone=Asia%2FSeoul`;
-    try {
-      const wres = await fetch(wUrl, { cache: 'no-store' });
-      if (!wres.ok) throw new Error('weather ' + wres.status);
-      const w = await wres.json();
-      let air = null;
-      try {
-        const ares = await fetch(aUrl, { cache: 'no-store' });
-        if (ares.ok) air = await ares.json();
-      } catch (e) { /* 미세먼지는 없어도 괜찮아요 */ }
-      const data = {
-        temp: Math.round(w.current.temperature_2m),
-        code: w.current.weather_code,
-        humidity: Math.round(w.current.relative_humidity_2m),
-        precip: w.current.precipitation,
-        tmax: Math.round(w.daily.temperature_2m_max[0]),
-        tmin: Math.round(w.daily.temperature_2m_min[0]),
-        prob: w.daily.precipitation_probability_max ? w.daily.precipitation_probability_max[0] : null,
-        pm10: air && air.current && air.current.pm10 != null ? Math.round(air.current.pm10) : null,
-        pm25: air && air.current && air.current.pm2_5 != null ? Math.round(air.current.pm2_5) : null,
-        at: Date.now(),
-        manual: false
-      };
-      wstate.cache = { place: wstate.place, at: Date.now(), data };
-      wstate.manual = null;
-      saveW();
-      $('#wManual').hidden = true;
-      renderWeather(data);
-    } catch (e) {
-      if (cache && cache.data && cache.place === wstate.place) {
-        renderWeather(cache.data, true);
-        return;
-      }
-      $('#wEmoji').textContent = '🌫️';
-      $('#wTemp').textContent = '';
-      $('#wDesc').textContent = '날씨를 불러오지 못했어요';
-      $('#wSub').textContent = '아래에서 직접 골라주세요';
-      $('#wManual').hidden = false;
-      $('#wAdvice').innerHTML = '<span class="tip-empty">직접 고른 날씨로 안내를 보여드릴게요 🐢</span>';
-    }
-  }
-
-  function setPlace(place) {
-    if (!PLACES[place]) return;
-    wstate.place = place;
-    wstate.cache = null;
-    wstate.manual = null;
-    saveW();
-    $$('#placeSwitch .place').forEach((b) => b.classList.toggle('on', b.dataset.place === place));
-    $('#wManual').hidden = true;
-    fetchWeather(true);
+    playNotes([420], 'sine', 0.09);
+    const name = (state.members[who] && state.members[who].name) || who;
+    setPhraseStatus(`${name} 칸을 지웠어요 🐢`);
   }
 
   /* ---------------- 렌더 ---------------- */
@@ -1027,60 +889,27 @@
       playNotes([700], 'sine', 0.08);
     });
 
-    // 오늘의 한마디
-    const grid = $('#phraseGrid');
-    grid.addEventListener('input', (e) => {
-      const ta = e.target.closest('textarea');
-      if (!ta) return;
-      const who = ta.closest('.phrase-card').dataset.who;
-      clearTimeout(phraseTimers[who]);
-      phraseTimers[who] = setTimeout(() => savePhrase(who, ta.value, false), 700);
-    });
-    grid.addEventListener('focusout', (e) => {
-      const ta = e.target.closest('textarea');
-      if (!ta) return;
-      const who = ta.closest('.phrase-card').dataset.who;
-      clearTimeout(phraseTimers[who]);
-      savePhrase(who, ta.value, false);
-    });
-    grid.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-phrase-save]');
-      if (!btn) return;
-      const who = btn.dataset.phraseSave;
-      const card = btn.closest('.phrase-card');
-      savePhrase(who, $('textarea', card).value, true);
-    });
-
-    // 날씨
-    $('#placeSwitch').addEventListener('click', (e) => {
-      const b = e.target.closest('.place');
-      if (!b) return;
-      setPlace(b.dataset.place);
-    });
-    $('#wRefresh').addEventListener('click', () => { playNotes([880], 'sine', 0.07, 0.1); fetchWeather(true); });
-    $('#wAdvice').addEventListener('click', (e) => {
-      const x = e.target.closest('[data-tip]');
-      if (x) {
-        const k = x.dataset.tip;
-        if (wstate.hidden.date !== dateKey()) wstate.hidden = { date: dateKey(), keys: [] };
-        if (!wstate.hidden.keys.includes(k)) wstate.hidden.keys.push(k);
-        saveW();
-        const card = wstate.cache && wstate.cache.data;
-        renderAdvice(card || (wstate.manual ? { code: wstate.manual.code } : null));
+    // 오늘의 한마디 (한 줄 입력 · 저장 · 삭제)
+    const phraseList = $('#phraseList');
+    phraseList.addEventListener('click', (e) => {
+      const row = e.target.closest('.phrase-row');
+      if (!row) return;
+      const who = row.dataset.who;
+      if (e.target.closest('.p-save')) {
+        savePhrase(who, $('.p-input', row).value, true);
         return;
       }
-      if (e.target.closest('#wAgain')) {
-        wstate.hidden = { date: dateKey(), keys: [] };
-        saveW();
-        const card = wstate.cache && wstate.cache.data;
-        renderAdvice(card || (wstate.manual ? { code: wstate.manual.code } : null));
-      }
+      if (e.target.closest('.p-del')) deletePhrase(who);
     });
-    $('#wManualSel').addEventListener('change', () => {
-      const code = Number($('#wManualSel').value) || 0;
-      wstate.manual = { code, at: Date.now() };
-      saveW();
-      renderWeather({ manual: true, code, temp: null, at: Date.now() });
+    phraseList.addEventListener('keydown', (e) => {
+      const input = e.target.closest('.p-input');
+      if (!input) return;
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const who = input.closest('.phrase-row').dataset.who;
+        savePhrase(who, input.value, true);
+        input.blur();
+      }
     });
 
     // 채팅
@@ -1271,7 +1100,7 @@
     updateAlarmHint();
     bind();
     setInterval(checkAlarm, 1000);
-    fetchWeather(false);
+    setPhraseStatus('각 칸에 한 줄씩 적고 저장을 눌러보세요 🐾');
 
     if (state.settings.pinEnabled && state.settings.pinHash) showLock();
 

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFF3E4">
 <title>인봉뿌 대시보드 🐱🐢</title>
-<meta name="description" content="오늘 날씨와 안내, 공부 용돈 적립, 오늘의 한마디, 할 일, 가족 채팅, 공부 타이머까지 한 화면에 담은 인봉뿌 대시보드">
+<meta name="description" content="공부 용돈 적립, 오늘의 한마디, 할 일, 가족 채팅, 공부 타이머까지 한 화면에 담은 인봉뿌 대시보드">
 <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
@@ -144,39 +144,6 @@
     </section>
 
 
-    <!-- 오늘 날씨 -->
-    <section class="card wide weather" id="weather">
-      <div class="card-head">
-        <h2>🌤️ 오늘 날씨</h2>
-        <div class="place-switch" id="placeSwitch">
-          <button class="place on" data-place="gunpo">군포</button>
-          <button class="place" data-place="seoul">서울</button>
-        </div>
-      </div>
-      <div class="weather-body">
-        <div class="weather-now">
-          <span class="w-emoji" id="wEmoji">🌤️</span>
-          <div class="w-main">
-            <strong id="wTemp">--°</strong>
-            <span class="w-desc" id="wDesc">날씨를 불러오는 중이에요…</span>
-            <span class="w-sub" id="wSub"></span>
-          </div>
-          <button class="mini-btn" id="wRefresh">새로고침</button>
-        </div>
-        <div class="w-advice" id="wAdvice"></div>
-        <div class="w-manual" id="wManual" hidden>
-          <label for="wManualSel">직접 고르기</label>
-          <select id="wManualSel">
-            <option value="0">☀️ 맑음</option>
-            <option value="2">⛅ 구름 조금</option>
-            <option value="3">☁️ 흐림</option>
-            <option value="61">🌧️ 비</option>
-            <option value="71">❄️ 눈</option>
-          </select>
-        </div>
-      </div>
-    </section>
-
     <div class="grid">
       <!-- 1. 용돈 적립 -->
       <section class="card" id="money">
@@ -203,9 +170,33 @@
           <h2>💌 오늘의 한마디</h2>
           <span class="pill soft">엄마 · 아빠 · 현</span>
         </div>
-        <p class="hint">한 줄씩 적어두면 하루가 차곡차곡 쌓여요. 적는 대로 자동 저장!</p>
-        <div class="phrase-grid" id="phraseGrid"></div>
+        <p class="hint">한 줄씩 적고 <b>저장</b>을 누르면 오늘의 한마디가 남아요.</p>
+        <ul class="phrase-list" id="phraseList">
+          <li class="phrase-row" data-who="mom">
+            <span class="p-face">🐱</span>
+            <span class="p-name">엄마</span>
+            <input class="p-input" type="text" maxlength="80" placeholder="오늘 엄마의 한마디" aria-label="엄마 오늘의 한마디" autocomplete="off">
+            <button class="soft p-save" type="button">저장</button>
+            <button class="soft danger p-del" type="button">삭제</button>
+          </li>
+          <li class="phrase-row" data-who="dad">
+            <span class="p-face">🐢</span>
+            <span class="p-name">아빠</span>
+            <input class="p-input" type="text" maxlength="80" placeholder="오늘 아빠의 한마디" aria-label="아빠 오늘의 한마디" autocomplete="off">
+            <button class="soft p-save" type="button">저장</button>
+            <button class="soft danger p-del" type="button">삭제</button>
+          </li>
+          <li class="phrase-row" data-who="kid">
+            <span class="p-face">🐰</span>
+            <span class="p-name">현</span>
+            <input class="p-input" type="text" maxlength="80" placeholder="오늘 현의 한마디" aria-label="현 오늘의 한마디" autocomplete="off">
+            <button class="soft p-save" type="button">저장</button>
+            <button class="soft danger p-del" type="button">삭제</button>
+          </li>
+        </ul>
+        <p class="hint tiny" id="phraseStatus"></p>
       </section>
+
       <!-- 3. 할 일 -->
       <section class="card" id="todos">
         <div class="card-head">

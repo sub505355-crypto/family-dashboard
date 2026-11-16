@@ -538,88 +538,36 @@ button.primary:disabled { opacity: .55; box-shadow: 0 4px 0 #F5B7C6; }
 .foot p { font-size: 12px; margin: 2px 0 0; }
 
 
-/* ---------- 오늘 날씨 ---------- */
-.weather {
-  background: linear-gradient(150deg, #EAF6FF 0%, #F4FBFF 45%, #EFFAF3 100%);
-  border-color: #fff;
-  margin-bottom: 16px;
-}
-.place-switch { display: flex; gap: 5px; background: rgba(255,255,255,.8); border-radius: 999px; padding: 3px; }
-.place {
-  padding: 5px 12px; border-radius: 999px; font-size: 12.5px; color: #7FA6C4;
-  font-family: var(--font-title);
-}
-.place.on { background: #fff; color: var(--sky-ink); box-shadow: 0 3px 8px -4px rgba(90,140,180,.6); }
-
-.weather-body { display: flex; flex-direction: column; gap: 10px; }
-.weather-now { display: flex; align-items: center; gap: 12px; }
-.w-emoji { font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(150,190,220,.35)); animation: bob 4s ease-in-out infinite; }
-.w-main { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-#wTemp { font-family: var(--font-title); font-size: 30px; color: #4B8FC7; line-height: 1.15; }
-.w-desc { font-size: 13px; color: #5D89A8; }
-.w-sub { font-size: 11.5px; color: #93B3C9; }
-.weather-now .mini-btn { background: #fff; color: var(--sky-ink); }
-
-.w-advice { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; align-items: center; }
-.tip {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 6px 8px 6px 11px; border-radius: 999px; font-size: 12.5px;
-  background: #fff; color: #5B7C93; border: 1.5px solid #DCEDF9;
-  box-shadow: 0 3px 8px -6px rgba(120,160,190,.8);
-  animation: popIn .35s cubic-bezier(.25,1.5,.5,1);
-}
-.tip.mask { background: #FFF1F5; color: #C1708C; border-color: #FFDDE7; }
-.tip.warm { background: #F3EEFF; color: #8878BD; border-color: #E6DCFF; }
-.tip.water { background: #EAF7FF; color: #4C8FBB; border-color: #D6EDFB; }
-.tip.umbrella { background: #EEF6FF; color: #5488BE; border-color: #DCEBFB; }
-.tip .tip-x { width: 18px; height: 18px; border-radius: 50%; font-size: 10px; color: #A9BECD; background: rgba(255,255,255,.9); }
-.tip-empty { font-size: 12.5px; color: #8FB0C6; }
-.w-again { font-size: 11.5px; color: #8FB0C6; text-decoration: underline; padding: 4px; }
-.w-manual { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #7FA6C4; }
-.w-manual select {
-  border: 2px solid #DCEBF7; border-radius: 10px; padding: 6px 10px; font-size: 12.5px;
-  background: #fff; color: #4B8FC7;
-}
-
 /* ---------- 오늘의 한마디 ---------- */
-.phrase-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
-.phrase-card {
-  background: #FFFBF6; border: 2px solid #F6EADF; border-radius: 18px; padding: 10px 12px 9px;
-  display: flex; flex-direction: column; gap: 6px; position: relative;
+.phrase-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.phrase-row {
+  display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  align-items: center; gap: 7px;
+  background: #FFFBF6; border: 2px solid #F6EADF; border-radius: 16px; padding: 8px 9px;
 }
-.phrase-card.p-mom { background: #FFF6F9; border-color: #FFE3EC; }
-.phrase-card.p-dad { background: #F4FAFF; border-color: #DFEEFB; }
-.phrase-card.p-kid { background: #F4FCF7; border-color: #DCF2E5; }
-.phrase-head { display: flex; align-items: center; gap: 6px; }
-.phrase-head .p-face {
-  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 14px; background: #fff; box-shadow: 0 2px 6px -3px rgba(180,140,120,.6);
+.phrase-row[data-who="mom"] { background: #FFF6F9; border-color: #FFE3EC; }
+.phrase-row[data-who="dad"] { background: #F4FAFF; border-color: #DFEEFB; }
+.phrase-row[data-who="kid"] { background: #F4FCF7; border-color: #DCF2E5; }
+.phrase-row .p-face {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 15px; background: #fff; box-shadow: 0 2px 6px -3px rgba(180,140,120,.6);
 }
-.phrase-head .p-name { font-family: var(--font-title); font-size: 13.5px; color: #7A5B4B; flex: 1; }
-.phrase-head .p-time { font-size: 10.5px; color: #C4B3A4; }
-.phrase-card textarea {
-  width: 100%; min-height: 62px; resize: vertical; border: 0; border-radius: 12px;
-  background: rgba(255,255,255,.75); padding: 9px 10px; font-size: 13.5px; line-height: 1.5;
-  outline: none; color: #5B4A3F; font-family: var(--font);
+.phrase-row .p-name { font-family: var(--font-title); font-size: 13px; color: #7A5B4B; min-width: 26px; }
+.phrase-row .p-input {
+  width: 100%; min-width: 0; border: 2px solid #EFE1D4; border-radius: 12px;
+  padding: 9px 11px; font-size: 14px; background: #fff; color: #5B4A3F; outline: none;
+  -webkit-user-select: text; user-select: text;
 }
-.phrase-card textarea::placeholder { color: #C7B6A8; }
-.phrase-card textarea:focus { background: #fff; box-shadow: 0 0 0 2px rgba(255,180,200,.45); }
-.phrase-foot { display: flex; justify-content: flex-end; }
-.phrase-foot button { font-size: 11.5px; padding: 5px 11px; border-radius: 10px; }
-.phrase-saved {
-  position: absolute; right: 12px; bottom: 12px; font-size: 11px; color: var(--mint-ink);
-  opacity: 0; transition: opacity .25s ease;
-}
-.phrase-saved.on { opacity: 1; }
+.phrase-row .p-input:focus { border-color: #FFC7D8; box-shadow: 0 0 0 3px rgba(255,199,216,.28); }
+.phrase-row .p-input::placeholder { color: #C7B6A8; }
+.phrase-row .p-save, .phrase-row .p-del { padding: 8px 10px; font-size: 12px; border-radius: 11px; min-width: 44px; }
+.phrase-row.saved { animation: pulsePop .45s ease; }
+#phraseStatus { min-height: 16px; margin: 8px 2px 0; }
 
 @media (min-width: 720px) {
-  .phrase-grid { grid-template-columns: repeat(3, 1fr); }
-  .weather-now { gap: 16px; flex: 0 1 auto; }
-  .w-emoji { font-size: 54px; }
-  #wTemp { font-size: 36px; }
-  .w-main { flex: 0 1 auto; }
-  .weather .weather-body { flex-direction: row; align-items: center; gap: 16px; flex-wrap: nowrap; }
-  .w-advice { margin-left: auto; justify-content: flex-end; max-width: 55%; }
+  .phrase-row { gap: 10px; padding: 9px 12px; }
+  .phrase-row .p-name { font-size: 14px; min-width: 34px; }
+  .phrase-row .p-save, .phrase-row .p-del { padding: 9px 16px; font-size: 13px; }
 }
 
 /* ---------- 애니메이션 ---------- */
