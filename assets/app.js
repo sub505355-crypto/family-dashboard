@@ -60,6 +60,11 @@
     const s = Object.assign(base, raw);
     s.members = Object.assign(base.members, raw.members || {});
     s.settings = Object.assign(base.settings, raw.settings || {});
+    // 예전 저장값(동기화 주소 없음)은 기본 가족 동기화 주소로 올려준다.
+    if (raw.settings && raw.settings.syncUrl === '' && raw.settings.syncOn !== false) {
+      s.settings.syncUrl = DEFAULT_SYNC_URL;
+      s.settings.syncOn = true;
+    }
     s.alarm = Object.assign(base.alarm, raw.alarm || {});
     s.timer = Object.assign(base.timer, raw.timer || {});
     ['earnItems', 'history', 'todos', 'chat'].forEach((k) => {
@@ -598,7 +603,7 @@
     $('#pinInput').value = '';
     $('#soundToggle').checked = !!state.settings.sound;
     $('#syncUrl').value = state.settings.syncUrl || '';
-    setSyncStatus(sync.ref ? '실시간 동기화 연결됨 🐱' : '로컬 저장만 사용 중', sync.ref ? 'ok' : '');
+    setSyncStatus(sync.ref ? '실시간 동기화 연결됨 🐱' : (state.settings.syncUrl ? '동기화 주소로 연결하는 중… (실패하면 가족 DB 규칙을 확인해 주세요)' : '로컬 저장만 사용 중'), sync.ref ? 'ok' : '');
     $('#settingsModal').hidden = false;
   }
 
@@ -721,6 +726,7 @@
     } catch (e) {
       sync.ref = null;
       setSyncStatus('연결 실패: ' + e.message, 'err');
+      console.warn('[sync]', e);
       toast('동기화 연결에 실패했어요. 주소와 규칙을 확인해 주세요.');
     }
   }
